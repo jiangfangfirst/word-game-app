@@ -7,6 +7,8 @@ android {
     namespace = "com.app.pakeplus"
     compileSdk = 34
 
+    /*
+    // 因为找不到 pakeplus.keystore 文件，这里已经注释掉自定义签名
     signingConfigs {
         create("release") {
             storeFile = rootProject.file("pakeplus.keystore")
@@ -15,6 +17,7 @@ android {
             keyAlias = "pakeplus"
         }
     }
+    */
 
     defaultConfig {
         applicationId = "com.oaikes.pakeplus.android"
@@ -28,17 +31,17 @@ android {
     buildTypes {
         debug {
             isDebuggable = true
-            isMinifyEnabled = true
-            isShrinkResources = true
-            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = false // 建议关闭混淆，避免 WebView 加载出现莫名其妙的报错
+            isShrinkResources = false
+            // signingConfig = signingConfigs.getByName("release") // 注释掉
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
         release {
-            isMinifyEnabled = true
-            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = false // 建议关闭混淆
+            // signingConfig = signingConfigs.getByName("release") // 注释掉
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
