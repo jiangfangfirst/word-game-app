@@ -218,6 +218,15 @@ class MainActivity : AppCompatActivity() {
         // 可以让内容视图的颜色延伸到屏幕边缘
         enableEdgeToEdge()
         setContentView(R.layout.single_main)
+        // ======= 新增：处理顶部白色状态栏 =======
+        // 将状态栏背景设为与游戏顶部 HUD 一致的深色 (#1e293b)
+        window.statusBarColor = android.graphics.Color.parseColor("#1e293b")
+        // 强制状态栏图标（时间、电量）变为白色（适用于深色背景）
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            @Suppress("DEPRECATION")
+            window.decorView.systemUiVisibility = window.decorView.systemUiVisibility and View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.inv()
+        }
+        // ==========================================
         if (!showLaunchSplash) {
             findViewById<View>(R.id.splash_overlay).visibility = View.GONE
         }
