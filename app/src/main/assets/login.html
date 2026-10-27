@@ -1,0 +1,594 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>单词夺宝 · 登录</title>
+<style>
+:root {
+  --gold: #fbbf24;
+  --gold-2: #f59e0b;
+  --gold-deep: #d97706;
+  --blue: #38bdf8;
+  --blue-deep: #0369a1;
+  --purple: #a78bfa;
+  --green: #10b981;
+  --red: #ef4444;
+  --txt: #e2e8f0;
+  --txt-dim: #94a3b8;
+  --txt-mute: #64748b;
+  --ease-spring: cubic-bezier(.34,1.56,.64,1);
+  --ease-out: cubic-bezier(.22,1,.36,1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+body {
+  font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+  background: #0b1220;
+  color: var(--txt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+  position: relative;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+/* ========== 背景星空 ========== */
+.bg-base {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 50% 20%, #1e1b4b 0%, #111c33 42%, #0b1220 78%);
+  z-index: 0;
+}
+.bg-stars {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: .85;
+  background-image:
+    radial-gradient(1.5px 1.5px at 18% 14%, rgba(255,255,255,.8) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 44% 7%, rgba(255,255,255,.55) 50%, transparent 50%),
+    radial-gradient(1px 1px at 69% 19%, rgba(255,255,255,.65) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 86% 11%, rgba(255,255,255,.55) 50%, transparent 50%),
+    radial-gradient(1px 1px at 10% 29%, rgba(255,255,255,.45) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 58% 27%, rgba(255,255,255,.55) 50%, transparent 50%),
+    radial-gradient(1px 1px at 33% 21%, rgba(255,255,255,.5) 50%, transparent 50%),
+    radial-gradient(1px 1px at 77% 33%, rgba(255,255,255,.45) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 24% 68%, rgba(255,255,255,.5) 50%, transparent 50%),
+    radial-gradient(1px 1px at 62% 78%, rgba(255,255,255,.4) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 88% 62%, rgba(255,255,255,.45) 50%, transparent 50%),
+    radial-gradient(1px 1px at 40% 88%, rgba(255,255,255,.35) 50%, transparent 50%);
+  animation: starTwinkle 4.5s ease-in-out infinite;
+}
+@keyframes starTwinkle {
+  0%,100% { opacity: .7; }
+  50% { opacity: 1; }
+}
+
+/* 漂浮光晕 */
+.bg-glow {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(60px);
+  pointer-events: none;
+  z-index: 1;
+  opacity: .55;
+}
+.bg-glow.g1 {
+  width: 320px; height: 320px;
+  left: -80px; top: -60px;
+  background: radial-gradient(circle, rgba(56,189,248,.55), transparent 68%);
+  animation: glowFloat1 14s ease-in-out infinite;
+}
+.bg-glow.g2 {
+  width: 360px; height: 360px;
+  right: -100px; bottom: -80px;
+  background: radial-gradient(circle, rgba(167,139,250,.5), transparent 68%);
+  animation: glowFloat2 17s ease-in-out infinite;
+}
+.bg-glow.g3 {
+  width: 260px; height: 260px;
+  left: 50%; top: 46%;
+  margin-left: -130px;
+  background: radial-gradient(circle, rgba(251,191,36,.28), transparent 68%);
+  animation: glowFloat3 20s ease-in-out infinite;
+}
+@keyframes glowFloat1 {
+  0%,100% { transform: translate(0,0) scale(1); }
+  50% { transform: translate(40px,50px) scale(1.12); }
+}
+@keyframes glowFloat2 {
+  0%,100% { transform: translate(0,0) scale(1); }
+  50% { transform: translate(-50px,-40px) scale(1.08); }
+}
+@keyframes glowFloat3 {
+  0%,100% { transform: translate(0,0) scale(1); }
+  50% { transform: translate(0,-40px) scale(1.15); }
+}
+
+/* ========== 登录卡 ========== */
+.login-wrap {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.login-card {
+  position: relative;
+  width: 100%;
+  background: linear-gradient(180deg, rgba(27,37,64,.96) 0%, rgba(15,23,42,.98) 60%, rgba(11,18,32,.99) 100%);
+  border: 1px solid rgba(148,163,184,.22);
+  border-radius: 26px;
+  padding: 36px 26px 26px;
+  box-shadow:
+    0 30px 80px rgba(0,0,0,.82),
+    0 0 70px rgba(56,189,248,.1),
+    inset 0 1px 0 rgba(255,255,255,.07);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  overflow: hidden;
+  animation: cardIn .72s var(--ease-spring) both;
+}
+@keyframes cardIn {
+  0% { transform: translateY(28px) scale(.94); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* 卡片顶部光带 */
+.login-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 76%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(56,189,248,.75), rgba(167,139,250,.75), transparent);
+  pointer-events: none;
+}
+/* 卡片顶部柔光 */
+.login-card::after {
+  content: '';
+  position: absolute;
+  top: -50px; left: 50%;
+  transform: translateX(-50%);
+  width: 300px; height: 160px;
+  background: radial-gradient(ellipse at center, rgba(129,140,248,.2) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* 图标 */
+.logo {
+  position: relative;
+  width: 64px; height: 64px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  background: radial-gradient(circle at 34% 30%, #fde68a, #f59e0b 55%, #9a3412);
+  border: 2px solid rgba(255,224,140,.6);
+  box-shadow:
+    0 0 26px rgba(251,191,36,.65),
+    inset 0 -5px 10px rgba(0,0,0,.35);
+  animation: logoFloat 2.8s ease-in-out infinite;
+}
+@keyframes logoFloat {
+  0%,100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-5px) scale(1.04); }
+}
+/* 图标外光圈 */
+.logo::after {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  border: 2px dashed rgba(251,191,36,.55);
+  animation: ringSpin 8s linear infinite;
+  pointer-events: none;
+}
+@keyframes ringSpin { to { transform: rotate(360deg); } }
+
+.title {
+  position: relative;
+  text-align: center;
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  background: linear-gradient(90deg, #38bdf8, #a78bfa, #f472b6, #38bdf8);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: flowText 5s linear infinite;
+  margin-bottom: 6px;
+}
+@keyframes flowText {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 12px;
+  color: var(--txt-mute);
+  letter-spacing: 1px;
+  margin-bottom: 22px;
+}
+
+/* 分隔线 */
+.divider {
+  height: 1px;
+  margin: 0 8px 20px;
+  background: linear-gradient(90deg, transparent, rgba(148,163,184,.3), transparent);
+}
+
+/* 输入标签 */
+.input-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--txt-dim);
+  letter-spacing: 1.2px;
+  margin-bottom: 8px;
+  padding-left: 2px;
+}
+
+/* 输入框 */
+.input-wrap {
+  position: relative;
+  margin-bottom: 6px;
+}
+#code {
+  width: 100%;
+  padding: 15px 46px 15px 16px;
+  border-radius: 13px;
+  border: 1.5px solid rgba(148,163,184,.26);
+  background: rgba(2,6,23,.62);
+  color: #f1f5f9;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  outline: none;
+  font-family: inherit;
+  transition: border-color .22s ease, box-shadow .22s ease, background .22s ease;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,.45);
+}
+#code::placeholder {
+  color: #475569;
+  font-weight: 400;
+  letter-spacing: .5px;
+}
+#code:focus {
+  border-color: rgba(56,189,248,.78);
+  background: rgba(2,6,23,.82);
+  box-shadow:
+    0 0 0 3px rgba(56,189,248,.14),
+    0 0 22px rgba(56,189,248,.28),
+    inset 0 2px 8px rgba(0,0,0,.45);
+}
+.input-icon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  opacity: .55;
+  pointer-events: none;
+  transition: opacity .22s;
+}
+#code:focus + .input-icon { opacity: 1; }
+
+/* 错误提示 */
+.err {
+  display: none;
+  margin-top: 8px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fca5a5;
+  background: rgba(239,68,68,.14);
+  border: 1px solid rgba(239,68,68,.36);
+  text-align: center;
+  letter-spacing: .3px;
+}
+.err.show {
+  display: block;
+  animation: errShake .45s ease, errIn .3s ease;
+}
+@keyframes errIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes errShake {
+  0%,100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+/* 进入按钮 */
+.btn-enter {
+  position: relative;
+  width: 100%;
+  margin-top: 18px;
+  padding: 15px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 48%, #d97706 100%);
+  color: #1f1300;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  cursor: pointer;
+  overflow: hidden;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid rgba(255,224,140,.42);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.55),
+    inset 0 -2px 8px rgba(120,53,15,.35),
+    0 2px 0 rgba(146,64,14,.9),
+    0 8px 26px rgba(245,158,11,.36);
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+.btn-enter::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  background: linear-gradient(110deg, transparent 34%, rgba(255,255,255,.5) 50%, transparent 66%);
+  background-size: 220% 100%;
+  background-position: 160% 0;
+  animation: shineSweep 3.2s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes shineSweep {
+  0%, 55% { background-position: 160% 0; }
+  100% { background-position: -60% 0; }
+}
+.btn-enter:hover { filter: brightness(1.06); }
+.btn-enter:active {
+  transform: translateY(2px) scale(.988);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.35),
+    inset 0 2px 8px rgba(120,53,15,.4),
+    0 1px 0 rgba(146,64,14,.9);
+}
+.btn-enter:disabled {
+  cursor: default;
+  filter: grayscale(.35) brightness(.92);
+}
+.btn-enter.loading::after {
+  animation-duration: .9s;
+}
+.btn-arrow {
+  font-size: 18px;
+  transition: transform .22s var(--ease-out);
+}
+.btn-enter:hover .btn-arrow { transform: translateX(4px); }
+
+/* 底部提示 */
+.tip {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--txt-mute);
+  letter-spacing: .2px;
+}
+.tip-small {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 10.5px;
+  color: #475569;
+  letter-spacing: .2px;
+}
+
+/* 版权 */
+.copyright {
+  font-size: 10.5px;
+  color: #3f4c60;
+  letter-spacing: .5px;
+  text-align: center;
+}
+</style>
+</head>
+<body>
+
+<div class="bg-base"></div>
+<div class="bg-stars"></div>
+<div class="bg-glow g1"></div>
+<div class="bg-glow g2"></div>
+<div class="bg-glow g3"></div>
+
+<div class="login-wrap">
+  <div class="login-card">
+    <div class="logo">🎮</div>
+    <h1 class="title">单词夺宝</h1>
+    <p class="subtitle">多多好学 · 英语课堂</p>
+
+    <div class="divider"></div>
+
+    
+    <div class="input-wrap">
+      <input type="text" id="code" placeholder="请输入学习码" autocomplete="off" autocapitalize="off" spellcheck="false" />
+      <span class="input-icon">🔑</span>
+    </div>
+
+    <div class="err" id="err"></div>
+
+    <button class="btn-enter" id="btnEnter" onclick="login()">
+      <span class="btn-text">进入战场</span>
+      <span class="btn-arrow">→</span>
+    </button>
+
+    <p class="tip">🔒 学习码已绑定设备，换设备需联系老师解锁</p>
+    <p class="tip-small">学习类游戏 | 防沉迷</p>
+  </div>
+
+  <div class="copyright">多多好学出品 @2026 版权所有</div>
+</div>
+
+<script>
+/* =========================================================
+   配置
+   ========================================================= */
+const UP_URL = "https://fitting-ostrich-312589.upstash.io";
+const UP_TOKEN = "gQAAAAAABMUNAAIgcDFiZDU2MDM2YWJkYzg0YTgyOTRlOTUzMjM1MWY1ZGJhNg";
+
+const VALID_CODES = ['duoduo2026', 'jiang2026', 'abc123', 'jiang2**3*6', '1**01*9*', 'new'];
+
+/* 学习码 → 学生名映射（老师可自行增删） */
+const STUDENT_MAP = {
+  'duoduo2026': '多多',
+  'abc123': '测试同学',
+  '10001090': '周卫',
+  'jf': '姜老师',
+  'jiang2026': '姜仿',
+  'new': '新生',
+  '10001292': '彭泽恩',
+  '10001393': '柯子辰',
+  '10001494': '姜景',
+  '10001595': '陈浩',
+  '10001696': '方佳莹',
+  '10001797': '姜仿2',
+  '10001898': '姜仿老师',//我现在用的
+  '11001898': '李安雅'
+};
+
+/* =========================================================
+   工具
+   ========================================================= */
+function getDeviceId() {
+  let d = localStorage.getItem('dd_device_id');
+  if (!d) {
+    d = 'd_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    localStorage.setItem('dd_device_id', d);
+  }
+  return d;
+}
+
+async function upGet(k) {
+  try {
+    const r = await fetch(UP_URL + '/get/' + k, {
+      headers: { 'Authorization': 'Bearer ' + UP_TOKEN }
+    });
+    const d = await r.json();
+    return d.result;
+  } catch (e) { return null; }
+}
+
+async function upSet(k, v) {
+  try {
+    await fetch(UP_URL + '/set/' + k + '/' + encodeURIComponent(v), {
+      headers: { 'Authorization': 'Bearer ' + UP_TOKEN }
+    });
+  } catch (e) {}
+}
+
+function showErr(m) {
+  const e = document.getElementById('err');
+  e.textContent = m;
+  e.classList.remove('show');
+  void e.offsetWidth;
+  e.classList.add('show');
+}
+
+function clearErr() {
+  document.getElementById('err').classList.remove('show');
+}
+
+function setLoading(on) {
+  const btn = document.getElementById('btnEnter');
+  const txt = btn.querySelector('.btn-text');
+  const arrow = btn.querySelector('.btn-arrow');
+  if (on) {
+    btn.classList.add('loading');
+    btn.disabled = true;
+    txt.textContent = '正在进入...';
+    arrow.textContent = '⏳';
+  } else {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+    txt.textContent = '进入战场';
+    arrow.textContent = '→';
+  }
+}
+
+/* 支持通配符 *（匹配任意字符） */
+function matchCode(code) {
+  return VALID_CODES.some(pattern => {
+    if (pattern === code) return true;
+    if (pattern.indexOf('*') < 0) return false;
+    const reg = new RegExp(
+      '^' + pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*') + '$'
+    );
+    return reg.test(code);
+  });
+}
+
+/* =========================================================
+   登录
+   ========================================================= */
+async function login() {
+  clearErr();
+
+  const c = document.getElementById('code').value.trim().toLowerCase();
+
+  if (!c) {
+    showErr('请输入学习码');
+    return;
+  }
+
+  if (!matchCode(c)) {
+    showErr('学习码错误，请重试');
+    return;
+  }
+
+  setLoading(true);
+
+  const did = getDeviceId();
+  const key = 'device:' + c;
+
+  const bound = await upGet(key);
+
+  if (bound && bound !== did) {
+    setLoading(false);
+    showErr('此学习码已在其他设备使用，请联系老师解锁');
+    return;
+  }
+
+  if (!bound) {
+    await upSet(key, did);
+  }
+
+  localStorage.setItem('dd_auth', c);
+  localStorage.setItem('dd_login_time', Date.now().toString());
+  localStorage.setItem('dd_name', STUDENT_MAP[c] || '同学');
+
+  setTimeout(() => { location.href = 'index.html'; }, 260);
+}
+
+document.getElementById('code').addEventListener('keydown', e => {
+  if (e.key === 'Enter') login();
+});
+document.getElementById('code').addEventListener('input', clearErr);
+</script>
+</body>
+</html>
