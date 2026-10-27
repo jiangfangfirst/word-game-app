@@ -323,7 +323,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // load webUrl or file:///android_asset/index.html
-        webView.loadUrl(webUrl)
+        webView.loadUrl("file:///android_asset/index.html")
 
 //        binding = ActivityMainBinding.inflate(layoutInflater)
 //        setContentView(R.layout.single_main)
