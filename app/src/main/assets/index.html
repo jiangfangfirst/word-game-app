@@ -1947,7 +1947,7 @@ body {
 
     <div class="splash-tip">
       <div class="splash-tip-ring"></div>
-      <span>带金色虚线圈的单词藏有惊喜或意外，游戏途中还会随机掉落宝箱。</span>
+      <span>金圈敌人藏惊喜，连续答对 5 题会掉落宝箱，战场也会随机掉落宝箱。</span>
     </div>
 
     <button class="splash-start" onclick="startGame()">开始闯关</button>
@@ -1986,7 +1986,7 @@ body {
 </div>
 
 <!-- ============ 词库 ============ -->
-<script src="gradewords.js?v=20261001"></script>
+<script src="分级单词库.js?v=20261001"></script>
 <script>
 /* =========================================================
    1. 数据与存储
@@ -2847,6 +2847,7 @@ function update(dt) {
     return true;
   });
 
+  /* 随机宝箱掉落判定 */
   if (!G.rulePhase && !G.chestActive && G.nextChestTime > 0 && now > G.nextChestTime) {
     spawnChest();
   }
@@ -3083,7 +3084,8 @@ function triggerMystery(enemy) {
    10. 宝箱系统
    ========================================================= */
 function scheduleNextChest() {
-  const delay = 15000 + Math.random() * 13000;
+  // 随机 30秒 ~ 90秒之间掉落（保证1分钟内0~2次）
+  const delay = 30000 + Math.random() * 60000;
   G.nextChestTime = performance.now() + delay;
   G.chestActive = false;
 }
@@ -3133,7 +3135,6 @@ function spawnChest() {
       sfxChestVanished();
       setTimeout(() => {
         if (chest.parentNode) chest.remove();
-        G.chestActive = false;
         scheduleNextChest();
       }, 600);
     }
@@ -3160,7 +3161,6 @@ function openChest(chest) {
 
     grantChestTreasure();
 
-    G.chestActive = false;
     scheduleNextChest();
   }, 380);
 }
@@ -3215,10 +3215,10 @@ const RULE_BATCHES = [
   ],
   [
     { text: '金圈敌人藏惊喜或意外', cls: 'gold' },
-    { text: '每击败 5 个单词，获得 1 个喇叭', cls: 'blue' }
+    { text: '连续答对 5 个，必定触发宝箱掉落', cls: 'blue' }
   ],
   [
-    { text: '连续答对 5 个，获得 1 次键盘高亮', cls: 'blue' }
+    { text: '战场上也会随机掉落宝箱，请注意点击', cls: 'blue' }
   ]
 ];
 
@@ -3465,6 +3465,7 @@ function handleWrongAnswer(e) {
   const correctWord = e.word.w;
   const isReview = G.isReview;
 
+  /* 答错中断连击 */
   G.streak = 0;
 
   if (isReview) {
@@ -3534,12 +3535,19 @@ function submitAnswer() {
     }
     markMastered(e.tier, e.word.w.toLowerCase());
 
+    /* 连击触发宝箱 */
     G.streak = (G.streak || 0) + 1;
     if (G.streak >= 5) {
       G.streak = 0;
       setTimeout(() => {
-        addItem('highlight', 1);
-        showToast('⌨️', '连击奖励！', '连续答对 5 个 · 键盘高亮 +1', '#fbbf24');
+        if (!G.chestActive) {
+          spawnChest();
+          showToast('🎁', '连击奖励！', '连续答对 5 个 · 掉落宝箱', '#fbbf24');
+        } else {
+          // 场上有宝箱时直接转成喇叭
+          addItem('speaker', 1);
+          showToast('🎺', '连击奖励！', '场上已有宝箱 · 获得喇叭 +1', '#38bdf8');
+        }
       }, 520);
     }
 
@@ -3699,7 +3707,8 @@ function startLevel(levelNum, isReview) {
     setTimeout(() => {
       if (G.running && !G.over) {
         scheduleNextChest();
-        G.nextChestTime = performance.now() + 6000 + Math.random() * 8000;
+        // 初次掉落稍微快一点，20~50秒
+        G.nextChestTime = performance.now() + 20000 + Math.random() * 30000;
       }
     }, ruleDelay);
   });
