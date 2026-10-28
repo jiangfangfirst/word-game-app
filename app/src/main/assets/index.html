@@ -2623,7 +2623,8 @@ function placeEnemies(list) {
     e.alive = true; e.el = null; e.aimLine = null;
     e.speed = cfg.speed * (0.85 + Math.random() * 0.35);
     e.tx = e.x; e.ty = e.y; e.wanderTimer = 0;
-    e.fireTimer = 1.0 + Math.random() * 1.5;
+    // 将首发开火时间均匀铺平在整个攻击周期内，杜绝开局一波流与之后的真空期
+    e.fireTimer = Math.random() * cfg.fireMax;
     e.nextAimed = Math.random() < cfg.aimProb;
     e.aimingPlayer = false;
   });
