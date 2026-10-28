@@ -2,7 +2,6 @@
 <html lang="zh-CN">
 <head>
 <script>
-// 登录检查：未登录跳回login.html
 if(!localStorage.getItem('dd_auth')){ location.href='login.html'; }
 </script>
 <meta charset="UTF-8">
@@ -101,34 +100,22 @@ body {
   text-overflow: ellipsis;
   display: inline-block;
 }
-.rank-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  line-height: 1;
-}
+.rank-item { display: inline-flex; align-items: center; gap: 2px; line-height: 1; }
 .rank-item i {
-  font-style: normal;
-  font-size: 18px;
-  line-height: 1;
+  font-style: normal; font-size: 18px; line-height: 1;
   filter: drop-shadow(0 0 6px rgba(251,191,36,.4));
 }
 .rank-item .rank-num {
-  font-size: 14px;
-  font-weight: 800;
-  color: #cbd5e1;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -.2px;
+  font-size: 14px; font-weight: 800; color: #cbd5e1;
+  font-variant-numeric: tabular-nums; letter-spacing: -.2px;
 }
 .rank-item.sun .rank-num { color: #fde68a; }
 .rank-item.moon .rank-num { color: #bae6fd; }
 .rank-item.star .rank-num { color: #fcd34d; }
 
 .enemy-count {
-  font-size: 14px;
-  color: var(--txt-dim);
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
+  font-size: 14px; color: var(--txt-dim);
+  white-space: nowrap; font-variant-numeric: tabular-nums;
 }
 .enemy-count b { color: #f87171; font-size: 16px; }
 
@@ -165,53 +152,50 @@ body {
   content: ''; position: absolute; top: -2px; left: 0; right: 0; height: 2px;
   background: linear-gradient(90deg, transparent, rgba(167,139,250,.65), transparent);
 }
+
+/* path-line 用 transform 滚动（可合成层，不重绘） */
 .path-line {
   position: absolute;
   left: 50%; top: 6%; bottom: 6%; width: 2px;
-  background-image: linear-gradient(180deg, rgba(167,139,250,.5) 50%, transparent 50%);
-  background-size: 2px 14px;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(167,139,250,.5) 0 7px,
+    transparent 7px 14px
+  );
   transform: translateX(-50%);
   opacity: .35;
   pointer-events: none;
-  animation: pathFlow 1.4s linear infinite;
+  animation: pathScroll 1.4s linear infinite;
+  will-change: transform;
 }
-@keyframes pathFlow {
-  from { background-position-y: 0; }
-  to { background-position-y: -14px; }
+@keyframes pathScroll {
+  from { transform: translateX(-50%) translateY(0); }
+  to   { transform: translateX(-50%) translateY(-14px); }
 }
 
 /* ================= Ready / Go ================= */
 .ready-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 100;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
+  position: absolute; inset: 0; z-index: 100;
+  display: flex; align-items: flex-end; justify-content: center;
   padding-bottom: 34%;
-  pointer-events: none;
-  opacity: 0;
+  pointer-events: none; opacity: 0;
   transition: opacity .2s ease;
 }
 .ready-overlay.show { opacity: 1; }
 .ready-word {
   font-size: clamp(52px, 15vw, 96px);
-  font-weight: 900;
-  letter-spacing: 4px;
+  font-weight: 900; letter-spacing: 4px;
   background: linear-gradient(135deg, #38bdf8, #a78bfa, #f472b6);
   background-size: 200% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
+  -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent;
   filter: drop-shadow(0 8px 28px rgba(56,189,248,.55));
   animation: readyIn .6s cubic-bezier(.34,1.56,.64,1);
-  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 .ready-word.go {
   background: linear-gradient(135deg, #fbbf24, #f97316, #ef4444);
   background-size: 200% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
+  -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent;
   filter: drop-shadow(0 8px 28px rgba(251,191,36,.65));
   animation: goIn .55s cubic-bezier(.34,1.56,.64,1);
@@ -229,31 +213,21 @@ body {
 
 /* ================= 规则面板 ================= */
 .rules-panel {
-  position: absolute;
-  left: 50%;
-  bottom: 23%;
+  position: absolute; left: 50%; bottom: 23%;
   transform: translateX(-50%);
   z-index: 15;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  align-items: center;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity .45s ease;
-  max-width: 92%;
+  display: flex; flex-direction: column; gap: 6px;
+  align-items: center; pointer-events: none;
+  opacity: 0; transition: opacity .45s ease; max-width: 92%;
 }
 .rules-panel.show { opacity: 1; }
 .rule-line {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 14px; font-weight: 600;
   color: rgba(226,232,240,.9);
   background: rgba(15,23,42,.82);
   border: 1px solid rgba(148,163,184,.22);
-  border-radius: 8px;
-  padding: 6px 14px;
-  white-space: nowrap;
-  letter-spacing: .2px;
+  border-radius: 8px; padding: 6px 14px;
+  white-space: nowrap; letter-spacing: .2px;
   opacity: 0;
   animation: ruleIn .42s ease-out forwards;
   box-shadow: 0 2px 10px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.05);
@@ -276,63 +250,41 @@ body {
 
 /* ================= 宝箱 ================= */
 .chest {
-  position: absolute;
-  width: 90px;
-  height: 90px;
-  margin-left: -45px;
-  top: -120px;
-  z-index: 50;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  will-change: top, transform, opacity;
+  position: absolute; width: 90px; height: 90px;
+  margin-left: -45px; top: -120px;
+  z-index: 50; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  will-change: top;
   -webkit-tap-highlight-color: transparent;
   pointer-events: auto;
   transition: top .9s cubic-bezier(.34,1.56,.64,1);
 }
 .chest.paused {
-  filter: grayscale(0.8) brightness(0.7);
+  filter: grayscale(.8) brightness(.7);
   pointer-events: none;
   animation-play-state: paused !important;
 }
-.chest.paused * {
-  animation-play-state: paused !important;
-}
+.chest.paused * { animation-play-state: paused !important; }
 
 .chest-icon {
   position: relative;
-  font-size: 54px;
-  line-height: 1;
+  font-size: 54px; line-height: 1;
   filter: drop-shadow(0 0 20px rgba(251,191,36,.9)) drop-shadow(0 4px 10px rgba(0,0,0,.6));
   z-index: 2;
   transition: transform .15s ease;
 }
 .chest-aura {
-  position: absolute;
-  inset: -10px;
-  border-radius: 50%;
+  position: absolute; inset: -10px; border-radius: 50%;
   background: radial-gradient(circle, rgba(251,191,36,.5) 0%, rgba(251,191,36,0) 68%);
-  opacity: 0;
-  transition: opacity .4s ease;
-  pointer-events: none;
+  opacity: 0; transition: opacity .4s ease; pointer-events: none;
 }
 .chest-ring {
-  position: absolute;
-  inset: 2px;
-  border-radius: 50%;
+  position: absolute; inset: 2px; border-radius: 50%;
   border: 2px dashed rgba(251,191,36,.8);
-  opacity: 0;
-  pointer-events: none;
+  opacity: 0; pointer-events: none;
   transition: opacity .4s ease;
 }
-
-.chest.dropping {
-  animation: none;
-}
-.chest.landed {
-  animation: chestBob 1.5s ease-in-out infinite;
-}
+.chest.landed { animation: chestBob 1.5s ease-in-out infinite; }
 .chest.landed .chest-aura {
   opacity: 1;
   animation: chestAuraPulse 1.4s ease-in-out infinite;
@@ -342,7 +294,7 @@ body {
   animation: chestRingSpin 3s linear infinite;
 }
 .chest.landed .chest-icon {
-  animation: chestIconGlow 1.6s ease-in-out infinite;
+  filter: drop-shadow(0 0 22px rgba(251,191,36,1)) drop-shadow(0 4px 10px rgba(0,0,0,.6));
 }
 @keyframes chestBob {
   0%,100% { transform: translateY(0) scale(1); }
@@ -352,28 +304,14 @@ body {
   0%,100% { transform: scale(1); opacity: .7; }
   50% { transform: scale(1.2); opacity: 1; }
 }
-@keyframes chestRingSpin {
-  to { transform: rotate(360deg); }
-}
-@keyframes chestIconGlow {
-  0%,100% { transform: scale(1); filter: drop-shadow(0 0 12px rgba(251,191,36,.8)) drop-shadow(0 4px 10px rgba(0,0,0,.6)); }
-  50% { transform: scale(1.1); filter: drop-shadow(0 0 28px rgba(251,191,36,1)) drop-shadow(0 4px 10px rgba(0,0,0,.6)); }
-}
+@keyframes chestRingSpin { to { transform: rotate(360deg); } }
 
 .chest.opened {
-  animation: none;
-  pointer-events: none;
-  cursor: default;
+  animation: none; pointer-events: none; cursor: default;
 }
 .chest.opened .chest-ring,
-.chest.opened .chest-aura {
-  animation: none;
-  opacity: 0;
-  transition: opacity .2s;
-}
-.chest.opened .chest-icon {
-  animation: chestShake .38s ease-in-out;
-}
+.chest.opened .chest-aura { animation: none; opacity: 0; transition: opacity .2s; }
+.chest.opened .chest-icon { animation: chestShake .38s ease-in-out; }
 @keyframes chestShake {
   0%,100% { transform: rotate(0) scale(1); }
   20% { transform: rotate(-10deg) scale(1.15); }
@@ -381,12 +319,10 @@ body {
   60% { transform: rotate(-8deg) scale(1.28); }
   80% { transform: rotate(8deg) scale(1.35); }
 }
-
 .chest.fadeout {
   opacity: 0;
   transition: opacity .55s ease, top .9s ease;
 }
-
 .chest.burst {
   animation: chestBurstAnim .5s cubic-bezier(.22,1,.36,1) forwards;
   pointer-events: none;
@@ -398,9 +334,7 @@ body {
 }
 
 .burst-star {
-  position: fixed;
-  pointer-events: none;
-  z-index: 999;
+  position: fixed; pointer-events: none; z-index: 999;
   filter: drop-shadow(0 0 10px currentColor);
   animation: burstFly 1.05s cubic-bezier(.22,1,.36,1) forwards;
   will-change: transform, opacity;
@@ -412,28 +346,53 @@ body {
 }
 
 /* ================= 玩家 ================= */
+/* 容器只负责定位，不再承担 filter / animation，避免连累血量条 */
 .player {
   position: absolute;
   left: 50%; bottom: 10%;
-  margin-left: calc(clamp(40px, 11vw, 64px) / -2);
+  margin-left: calc(clamp(46px, 12vw, 68px) / -2);
   line-height: 1;
-  z-index: 12;
-  filter: drop-shadow(0 0 16px rgba(56,189,248,.6));
+  z-index: 30;
   transition: bottom .75s var(--ease-spring);
-  animation: playerIdle 1.8s ease-in-out infinite;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
+
+/* 头像主体：🧑 + 🚀 显式拼接，任何设备都稳定 */
+.player-emoji {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(46px, 12vw, 68px);
+  line-height: 1;
+  filter: drop-shadow(0 0 16px rgba(56,189,248,.6));
+  animation: playerIdle 1.8s ease-in-out infinite;
+  will-change: transform;
+}
 @keyframes playerIdle {
   0%,100% { transform: translateY(0) scale(1); }
   50% { transform: translateY(-6px) scale(1.04); }
 }
-.player-emoji {
-  font-size: clamp(40px, 11vw, 64px);
-  line-height: 1;
+.pe-main {
   display: block;
+  line-height: 1;
+}
+.pe-badge {
+  position: absolute;
+  right: -0.32em;
+  bottom: -0.06em;
+  font-size: 0.42em;
+  line-height: 1;
+  transform: rotate(-35deg);
+  filter: drop-shadow(0 0 6px rgba(251,191,36,.85));
+  animation: jetFlame 1.3s ease-in-out infinite;
+}
+@keyframes jetFlame {
+  0%,100% { opacity: .72; transform: rotate(-35deg) scale(1); }
+  50%     { opacity: 1;   transform: rotate(-35deg) scale(1.15); }
 }
 
 .shield-aura {
@@ -444,8 +403,7 @@ body {
   border-radius: 50%;
   border: 3px solid rgba(56,189,248,.85);
   box-shadow: 0 0 36px rgba(56,189,248,.9), inset 0 0 26px rgba(56,189,248,.5);
-  display: none;
-  pointer-events: none;
+  display: none; pointer-events: none;
   animation: auraPulse 1.2s ease-in-out infinite;
 }
 .player.shielded .shield-aura { display: block; }
@@ -456,24 +414,17 @@ body {
 
 .shield-timer {
   position: absolute;
-  left: 50%;
-  top: -10px;
+  left: 50%; top: -10px;
   transform: translateX(-50%);
-  font-size: 14px;
-  font-weight: 800;
+  font-size: 14px; font-weight: 800;
   color: #7dd3fc;
   background: rgba(15,23,42,.92);
   border: 1px solid rgba(56,189,248,.5);
   border-radius: 999px;
-  padding: 2px 8px;
-  letter-spacing: .1px;
+  padding: 2px 8px; letter-spacing: .1px;
   box-shadow: 0 1px 6px rgba(0,0,0,.5), 0 0 10px rgba(56,189,248,.35);
-  white-space: nowrap;
-  display: none;
-  pointer-events: none;
-  z-index: 3;
-  font-variant-numeric: tabular-nums;
-  line-height: 1.3;
+  white-space: nowrap; display: none; pointer-events: none;
+  z-index: 3; font-variant-numeric: tabular-nums; line-height: 1.3;
 }
 .player.shielded .shield-timer { display: block; }
 
@@ -481,127 +432,96 @@ body {
   position: absolute;
   left: calc(100% - 4px);
   bottom: 0px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  pointer-events: none;
-  z-index: 4;
+  display: flex; flex-direction: column; gap: 5px;
+  pointer-events: none; z-index: 4;
 }
 .item-chip {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  padding: 4px 10px;
-  border-radius: 8px;
+  display: flex; align-items: center; gap: 3px;
+  padding: 4px 10px; border-radius: 8px;
   background: rgba(15,23,42,.92);
   border: 1px solid rgba(56,189,248,.42);
-  font-size: 14px;
-  font-weight: 800;
-  color: #7dd3fc;
+  font-size: 14px; font-weight: 800; color: #7dd3fc;
   box-shadow: 0 1px 6px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.08);
   animation: itemPop .35s var(--ease-spring);
-  line-height: 1;
-  white-space: nowrap;
+  line-height: 1; white-space: nowrap;
 }
-.item-chip b {
-  color: #fbbf24;
-  font-size: 14px;
-  font-weight: 900;
-  font-variant-numeric: tabular-nums;
-}
+.item-chip b { color: #fbbf24; font-size: 14px; font-weight: 900; font-variant-numeric: tabular-nums; }
 @keyframes itemPop {
   from { transform: scale(.4); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  to   { transform: scale(1); opacity: 1; }
 }
 
 .player-status {
   position: absolute;
-  left: 50%;
-  top: 100%;
+  left: 50%; top: 100%;
   transform: translateX(-50%);
-  margin-top: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  pointer-events: none;
-  z-index: 2;
+  margin-top: 4px;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 4px; pointer-events: none; z-index: 3;
 }
 
 .status-label {
-  display: flex;
-  justify-content: space-between;
+  display: flex; justify-content: space-between;
   width: 162px;
-  font-size: 11px;
-  font-weight: 700;
-  color: #cbd5e1;
-  margin-bottom: 2px;
+  font-size: 11px; font-weight: 700;
+  color: #cbd5e1; margin-bottom: 1px;
   text-shadow: 0 1px 2px rgba(0,0,0,.5);
 }
 
 .timer-badge {
-  font-size: 15px;
-  font-weight: 800;
+  font-size: 13px; font-weight: 800;
   color: #7dd3fc;
   background: rgba(15,23,42,.92);
   border: 1px solid rgba(56,189,248,.42);
   border-radius: 999px;
-  padding: 4px 12px;
-  white-space: nowrap;
-  letter-spacing: .3px;
+  padding: 3px 10px;
+  white-space: nowrap; letter-spacing: .3px;
   box-shadow: 0 2px 10px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.08);
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-  margin-bottom: 4px;
+  font-variant-numeric: tabular-nums; line-height: 1; margin-bottom: 2px;
 }
 
 .player-hp {
-  width: 162px;
-  height: 14px;
-  border-radius: 7px;
+  width: 162px; height: 12px;
+  border-radius: 6px;
   background: rgba(2,6,23,.8);
   border: 1px solid rgba(148,163,184,.34);
   overflow: hidden;
   box-shadow: inset 0 1px 3px rgba(0,0,0,.7), 0 2px 8px rgba(0,0,0,.5);
 }
 .player-hp-fill {
-  height: 100%;
-  width: 100%;
+  height: 100%; width: 100%;
   background: linear-gradient(90deg, #ef4444, #f97316, #22c55e);
   background-size: 162px 100%;
   transition: width .28s var(--ease-out);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.3);
 }
 
-/* 连击槽 */
 .streak-bar-wrap {
-  width: 162px;
-  display: none;
-  flex-direction: column;
+  width: 162px; display: none; flex-direction: column;
 }
 .streak-bar-wrap.show { display: flex; }
 .streak-bar-fill {
-  height: 6px;
-  width: 0%;
+  height: 6px; width: 0%;
   background: linear-gradient(90deg, #fbbf24, #f59e0b);
   transition: width .3s var(--ease-spring);
-  box-shadow: 0 0 8px rgba(251,191,36,0.8);
+  box-shadow: 0 0 8px rgba(251,191,36,.8);
   border-radius: 3px;
 }
 
 .treasure {
   position: absolute;
   left: 50%; bottom: 88%;
-  margin-left: calc(clamp(40px, 11vw, 64px) / -2);
+  margin-left: calc(clamp(46px, 12vw, 68px) / -2);
   font-size: clamp(40px, 11vw, 64px);
   line-height: 1;
   z-index: 11;
   filter: drop-shadow(0 0 20px rgba(251,191,36,.85));
-  animation: treasureGlow 1.6s ease-in-out infinite;
+  animation: treasureFloat 2s ease-in-out infinite;
+  will-change: transform;
 }
-@keyframes treasureGlow {
-  0%,100% { filter: drop-shadow(0 0 12px rgba(251,191,36,.6)); transform: scale(1); }
-  50% { filter: drop-shadow(0 0 32px rgba(251,191,36,1)); transform: scale(1.12); }
+@keyframes treasureFloat {
+  0%,100% { transform: scale(1); }
+  50%     { transform: scale(1.08); }
 }
 
 /* ================= 敌人 ================= */
@@ -611,35 +531,48 @@ body {
   height: clamp(52px, 14vw, 76px);
   margin-left: calc(clamp(52px, 14vw, 76px) / -2);
   margin-bottom: calc(clamp(52px, 14vw, 76px) / -2);
-  z-index: 10;
-  cursor: pointer;
+  z-index: 10; cursor: pointer;
   transition: transform .12s;
-  will-change: left, bottom;
 }
 .enemy:active { transform: scale(.9); }
 .enemy-inner {
   width: 100%; height: 100%;
   transform-origin: center center;
-  transition: transform 0.3s ease;
+  transition: transform .3s ease;
 }
 .enemy.bloating .enemy-inner {
   transform: scale(1.8);
   transition: transform 120s linear;
 }
-.enemy.bloating .enemy-orb {
-  animation: elitePulse 1s ease-in-out infinite;
+
+/* 精英怪红环（仅 opacity 脉冲，可合成） */
+.enemy.bloating .enemy-orb::before {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  border-radius: 50%;
+  border: 2px solid rgba(239,68,68,.9);
+  pointer-events: none;
+  animation: eliteRingPulse 1s ease-in-out infinite;
 }
-@keyframes elitePulse {
-  0%,100% { box-shadow: 0 0 20px rgba(239,68,68,0.8), inset 0 0 10px rgba(239,68,68,0.5); border-color: rgba(239,68,68,1); }
-  50% { box-shadow: 0 0 40px rgba(239,68,68,1), inset 0 0 20px rgba(239,68,68,0.8); border-color: rgba(255,255,255,1); }
+@keyframes eliteRingPulse {
+  0%,100% { opacity: .4; transform: scale(.95); }
+  50%     { opacity: 1;  transform: scale(1.1); }
 }
-.enemy.streak-warning .enemy-orb {
-  animation: streakGlow 0.6s ease-in-out infinite !important;
-  border-color: #fbbf24 !important;
+
+/* 连击警告金环（仅 opacity 脉冲） */
+.enemy.streak-warning .enemy-orb::after {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  border: 2px solid #fbbf24;
+  pointer-events: none;
+  animation: streakRingPulse .6s ease-in-out infinite;
 }
-@keyframes streakGlow {
-  0%,100% { box-shadow: 0 0 10px #fbbf24, inset 0 0 10px #fbbf24; }
-  50% { box-shadow: 0 0 35px #fbbf24, inset 0 0 20px #fbbf24; }
+@keyframes streakRingPulse {
+  0%,100% { opacity: .35; transform: scale(.95); }
+  50%     { opacity: 1;  transform: scale(1.1); }
 }
 
 .enemy-orb {
@@ -655,38 +588,32 @@ body {
   50% { transform: translateY(-8px); }
 }
 
+/* 金圈敌人虚线环（仅 opacity 脉冲） */
 .enemy.mystery::after {
   content: '';
   position: absolute;
   inset: -8px;
   border-radius: 50%;
   border: 2px dashed rgba(251,191,36,.85);
-  animation: mysteryGlow 1.4s ease-in-out infinite;
   pointer-events: none;
   z-index: 1;
+  animation: mysteryGlow 1.4s ease-in-out infinite;
 }
 @keyframes mysteryGlow {
-  0%,100% { box-shadow: 0 0 0 0 rgba(251,191,36,0); opacity: .62; }
-  50% { box-shadow: 0 0 16px 3px rgba(251,191,36,.55); opacity: 1; }
+  0%,100% { opacity: .55; }
+  50%     { opacity: 1; }
 }
 
 .enemy-tag {
   position: absolute;
-  left: 50%;
-  bottom: -9px;
+  left: 50%; bottom: -9px;
   transform: translateX(-50%);
   font-size: clamp(10px, 2.8vw, 12px);
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: .1px;
-  padding: 3px 6px;
-  border-radius: 5px;
-  white-space: nowrap;
-  max-width: 90px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-weight: 700; line-height: 1; letter-spacing: .1px;
+  padding: 3px 6px; border-radius: 5px;
+  white-space: nowrap; max-width: 90px;
+  overflow: hidden; text-overflow: ellipsis;
   pointer-events: none;
-  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 .enemy.blue .enemy-tag {
   color: #dff3ff;
@@ -707,44 +634,31 @@ body {
   box-shadow: 0 1px 4px rgba(0,0,0,.45);
 }
 
+/* 敌人球体：静态 box-shadow，不再做重绘型呼吸 */
 .enemy.blue .enemy-orb {
   background: radial-gradient(circle at 34% 30%, #7dd3fc, #0ea5e9 55%, #075985);
-  box-shadow: 0 0 18px rgba(56,189,248,.75), inset 0 -5px 10px rgba(0,0,0,.35);
+  box-shadow: 0 0 22px rgba(56,189,248,.85), inset 0 -5px 10px rgba(0,0,0,.35);
   border: 2px solid rgba(186,230,253,.6);
-  animation: floatY 1.6s ease-in-out infinite var(--d1, 0s), blueBreathe 1.4s ease-in-out infinite var(--d2, 0s);
-}
-@keyframes blueBreathe {
-  0%,100% { box-shadow: 0 0 14px rgba(56,189,248,.6), inset 0 -5px 10px rgba(0,0,0,.35); }
-  50% { box-shadow: 0 0 28px rgba(56,189,248,1), inset 0 -5px 10px rgba(0,0,0,.35); }
+  animation: floatY 1.6s ease-in-out infinite var(--d1, 0s);
 }
 .enemy.orange .enemy-orb {
   background: radial-gradient(circle at 34% 30%, #fdba74, #f97316 55%, #9a3412);
-  box-shadow: 0 0 20px rgba(249,115,22,.8), inset 0 -5px 10px rgba(0,0,0,.35);
+  box-shadow: 0 0 24px rgba(249,115,22,.9), inset 0 -5px 10px rgba(0,0,0,.35);
   border: 2px solid rgba(254,215,170,.6);
-  animation: floatY 1.6s ease-in-out infinite var(--d1, 0s), orangePulse 1s ease-in-out infinite var(--d2, 0s);
-}
-@keyframes orangePulse {
-  0%,100% { box-shadow: 0 0 20px rgba(249,115,22,.8), inset 0 -5px 10px rgba(0,0,0,.35); }
-  50% { box-shadow: 0 0 32px rgba(249,115,22,1), inset 0 -5px 10px rgba(0,0,0,.35); }
+  animation: floatY 1.6s ease-in-out infinite var(--d1, 0s);
 }
 .enemy.red .enemy-orb {
   background: radial-gradient(circle at 34% 30%, #fca5a5, #ef4444 55%, #7f1d1d);
-  box-shadow: 0 0 22px rgba(239,68,68,.85), inset 0 -5px 10px rgba(0,0,0,.35);
+  box-shadow: 0 0 26px rgba(239,68,68,.9), inset 0 -5px 10px rgba(0,0,0,.35);
   border: 2px solid rgba(254,202,202,.6);
-  animation: floatY 1.6s ease-in-out infinite var(--d1, 0s), redBreathe 1.3s ease-in-out infinite var(--d2, 0s);
+  animation: floatY 1.6s ease-in-out infinite var(--d1, 0s);
 }
-@keyframes redBreathe {
-  0%,100% { box-shadow: 0 0 22px rgba(239,68,68,.85), inset 0 -5px 10px rgba(0,0,0,.35); }
-  50% { box-shadow: 0 0 36px rgba(239,68,68,1), inset 0 -5px 10px rgba(0,0,0,.35); }
-}
+
+/* 红色敌人瞄准中：只做亮度提升，不做 box-shadow 动画 */
 .enemy.red.aiming .enemy-orb {
-  animation: floatY 1.6s ease-in-out infinite var(--d1, 0s), aimPulse .4s ease-in-out infinite;
-  filter: brightness(1.35);
+  filter: brightness(1.4);
 }
-@keyframes aimPulse {
-  0%,100% { box-shadow: 0 0 22px rgba(239,68,68,.85); }
-  50% { box-shadow: 0 0 42px rgba(239,68,68,1); }
-}
+
 .enemy.die { pointer-events: none; animation: dieBreak .42s forwards; }
 @keyframes dieBreak {
   0% { transform: scale(1); opacity: 1; }
@@ -765,9 +679,7 @@ body {
 
 .aim-line {
   position: absolute;
-  height: 2px;
-  pointer-events: none;
-  z-index: 5;
+  height: 2px; pointer-events: none; z-index: 5;
   transform-origin: 0 50%;
   animation: aimBlink .5s ease-in-out infinite;
   border-radius: 1px;
@@ -784,9 +696,7 @@ body {
   position: absolute;
   width: 15px; height: 15px;
   margin-left: -7px; margin-bottom: -7px;
-  border-radius: 50%;
-  z-index: 8;
-  pointer-events: none;
+  border-radius: 50%; z-index: 8; pointer-events: none;
 }
 .proj.blue {
   background: radial-gradient(circle at 35% 32%, #bae6fd, #0ea5e9 60%, #075985);
@@ -826,8 +736,7 @@ body {
   border-radius: 50%;
   border: 2px solid rgba(56,189,248,.92);
   box-shadow: 0 0 14px rgba(56,189,248,.8), inset 0 0 10px rgba(56,189,248,.5);
-  pointer-events: none;
-  z-index: 30;
+  pointer-events: none; z-index: 30;
   animation: shatterRing .5s ease-out forwards;
 }
 @keyframes shatterRing {
@@ -869,23 +778,15 @@ body {
 
 .buff-bar {
   position: absolute;
-  left: 12px;
-  top: 12px;
+  left: 12px; top: 12px;
   z-index: 40;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: flex; flex-direction: column; gap: 8px;
   pointer-events: none;
 }
 .buff-chip {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: .2px;
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 999px;
+  font-size: 13px; font-weight: 800; letter-spacing: .2px;
   background: rgba(15,23,42,.92);
   border: 1px solid rgba(56,189,248,.45);
   color: #7dd3fc;
@@ -898,36 +799,23 @@ body {
   border-color: rgba(167,139,250,.5);
   color: #c4b5fd;
 }
-.buff-chip i {
-  font-style: normal;
-  font-size: 14px;
-  line-height: 1;
-}
+.buff-chip i { font-style: normal; font-size: 14px; line-height: 1; }
 @keyframes chipIn {
   from { transform: translateX(-14px) scale(.85); opacity: 0; }
-  to { transform: translateX(0) scale(1); opacity: 1; }
+  to   { transform: translateX(0) scale(1); opacity: 1; }
 }
 
 .toast-wrap {
   position: absolute;
-  left: 50%;
-  top: 15%;
+  left: 50%; top: 15%;
   transform: translateX(-50%);
   z-index: 45;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  pointer-events: none;
-  width: max-content;
-  max-width: 92%;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  pointer-events: none; width: max-content; max-width: 92%;
 }
 .toast {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 18px;
-  border-radius: 14px;
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 18px; border-radius: 14px;
   background: linear-gradient(180deg, rgba(30,41,59,.98), rgba(15,23,42,.98));
   border: 1px solid rgba(251,191,36,.5);
   box-shadow: 0 10px 30px rgba(0,0,0,.62), 0 0 26px rgba(251,191,36,.22), inset 0 1px 0 rgba(255,255,255,.1);
@@ -941,56 +829,28 @@ body {
 @keyframes toastOut {
   to { transform: translateY(-12px) scale(.92); opacity: 0; }
 }
-.toast-icon {
-  font-size: 22px;
-  line-height: 1;
-  filter: drop-shadow(0 0 8px rgba(251,191,36,.55));
-}
-.toast-text {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-.toast-text b {
-  font-size: 15px;
-  font-weight: 900;
-  letter-spacing: .3px;
-  line-height: 1.2;
-}
-.toast-text span {
-  font-size: 13px;
-  color: var(--txt-dim);
-  line-height: 1.2;
-}
+.toast-icon { font-size: 22px; line-height: 1; filter: drop-shadow(0 0 8px rgba(251,191,36,.55)); }
+.toast-text { display: flex; flex-direction: column; gap: 3px; }
+.toast-text b { font-size: 15px; font-weight: 900; letter-spacing: .3px; line-height: 1.2; }
+.toast-text span { font-size: 13px; color: var(--txt-dim); line-height: 1.2; }
 
 .footer {
   flex: 0 0 auto;
-  padding: 18px 16px calc(18px + env(safe-area-inset-bottom, 0px));
-  font-size: 14px;
-  color: var(--txt-mute);
-  text-align: center;
+  padding: 14px 16px calc(14px + env(safe-area-inset-bottom, 0px));
+  font-size: 14px; color: var(--txt-mute); text-align: center;
   background: rgba(15,23,42,.96);
   border-top: 1px solid var(--line);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  flex-wrap: wrap;
+  display: flex; align-items: center; justify-content: center;
+  gap: 12px; flex-wrap: wrap;
 }
 
 .review-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 16px 28px;
-  border-radius: 999px;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 20px; border-radius: 999px;
   border: 1px solid rgba(167,139,250,.42);
   background: rgba(167,139,250,.12);
-  color: #c4b5fd;
-  font-size: 20px;
-  font-weight: 700;
-  cursor: pointer;
-  font-family: inherit;
+  color: #c4b5fd; font-size: 16px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
   transition: all .18s var(--ease-out);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
 }
@@ -1000,26 +860,15 @@ body {
   color: #ddd6fe;
 }
 .review-btn:active { transform: scale(.95); }
-.review-btn b {
-  color: #fbbf24;
-  font-size: 22px;
-  font-weight: 900;
-  font-variant-numeric: tabular-nums;
-}
+.review-btn b { color: #fbbf24; font-size: 18px; font-weight: 900; font-variant-numeric: tabular-nums; }
 
 .home-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 16px 28px;
-  border-radius: 999px;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 20px; border-radius: 999px;
   border: 1px solid rgba(56,189,248,.42);
   background: rgba(56,189,248,.12);
-  color: #7dd3fc;
-  font-size: 20px;
-  font-weight: 700;
-  cursor: pointer;
-  font-family: inherit;
+  color: #7dd3fc; font-size: 16px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
   transition: all .18s var(--ease-out);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
 }
@@ -1031,13 +880,11 @@ body {
 .home-btn:active { transform: scale(.95); }
 
 /* =========================================================
-   原生风格自绘弹窗 (替代 alert / confirm)
+   自绘弹窗
    ========================================================= */
 .app-modal-mask {
   position: fixed; inset: 0; z-index: 9999;
-  background: rgba(2,6,23,.75);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(2,6,23,.78);
   display: flex; align-items: center; justify-content: center;
   opacity: 0; pointer-events: none;
   transition: opacity .26s ease;
@@ -1059,64 +906,32 @@ body {
 }
 .app-modal-mask.show .app-modal-card { transform: scale(1) translateY(0); opacity: 1; }
 
-.app-modal-title {
-  font-size: 20px;
-  font-weight: 900;
-  color: #f8fafc;
-  margin-bottom: 12px;
-  letter-spacing: .5px;
-}
-
-.app-modal-content {
-  font-size: 16px;
-  color: var(--txt-dim);
-  line-height: 1.6;
-  margin-bottom: 24px;
-}
-
-.app-modal-actions {
-  display: flex;
-  gap: 12px;
-}
-
+.app-modal-title { font-size: 20px; font-weight: 900; color: #f8fafc; margin-bottom: 12px; letter-spacing: .5px; }
+.app-modal-content { font-size: 16px; color: var(--txt-dim); line-height: 1.6; margin-bottom: 24px; }
+.app-modal-actions { display: flex; gap: 12px; }
 .app-modal-btn {
-  flex: 1;
-  padding: 14px 0;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 800;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all .15s ease;
-  border: none;
+  flex: 1; padding: 14px 0; border-radius: 12px;
+  font-size: 16px; font-weight: 800;
+  cursor: pointer; font-family: inherit;
+  transition: all .15s ease; border: none;
 }
 .app-modal-btn:active { transform: scale(.96); }
-
 .app-modal-btn-cancel {
-  background: rgba(148,163,184,.1);
-  color: var(--txt-dim);
+  background: rgba(148,163,184,.1); color: var(--txt-dim);
   border: 1px solid rgba(148,163,184,.3);
 }
-.app-modal-btn-cancel:hover {
-  background: rgba(148,163,184,.2);
-  color: #cbd5e1;
-}
-
 .app-modal-btn-confirm {
   background: linear-gradient(180deg, #38bdf8 0%, #0ea5e9 52%, #0369a1 100%);
   color: #fff;
   box-shadow: 0 4px 16px rgba(56,189,248,.3), inset 0 1px 0 rgba(255,255,255,.3);
 }
-.app-modal-btn-confirm:hover { filter: brightness(1.1); }
 
 /* =========================================================
    挑战弹窗
    ========================================================= */
 .modal-mask {
   position: fixed; inset: 0; z-index: 500;
-  background: radial-gradient(circle at 50% 100%, rgba(30,27,75,.6) 0%, rgba(2,6,23,.84) 62%);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background: radial-gradient(circle at 50% 100%, rgba(30,27,75,.85) 0%, rgba(2,6,23,.94) 62%);
   display: flex; align-items: flex-end; justify-content: center;
   opacity: 0; pointer-events: none;
   transition: opacity .26s ease;
@@ -1125,16 +940,12 @@ body {
 
 .pause-hint-mask {
   position: absolute;
-  top: 40%;
-  left: 50%;
+  top: 40%; left: 50%;
   transform: translate(-50%, -50%);
-  font-size: clamp(28px, 7vw, 36px);
-  font-weight: 900;
+  font-size: clamp(28px, 7vw, 36px); font-weight: 900;
   color: rgba(255, 255, 255, 0.15);
-  pointer-events: none;
-  z-index: 0;
-  letter-spacing: 8px;
-  white-space: nowrap;
+  pointer-events: none; z-index: 0;
+  letter-spacing: 8px; white-space: nowrap;
 }
 
 .modal {
@@ -1164,14 +975,6 @@ body {
   background: linear-gradient(90deg, transparent, rgba(56,189,248,.65), rgba(167,139,250,.65), transparent);
   pointer-events: none;
 }
-.modal::after {
-  content: '';
-  position: absolute; top: -30px; left: 50%;
-  transform: translateX(-50%);
-  width: 260px; height: 120px;
-  background: radial-gradient(ellipse at center, rgba(129,140,248,.16) 0%, transparent 70%);
-  pointer-events: none;
-}
 
 .modal-grip {
   width: 44px; height: 5px; border-radius: 3px;
@@ -1181,11 +984,8 @@ body {
 }
 
 .modal-top {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 18px;
-  position: relative;
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 18px; position: relative;
 }
 
 .word-avatar {
@@ -1218,18 +1018,11 @@ body {
 }
 
 .word-meaning {
-  flex: 1;
-  min-width: 0;
-  font-size: 20px;
-  font-weight: 800;
-  color: #f1f5f9;
-  line-height: 1.35;
-  letter-spacing: .3px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  flex: 1; min-width: 0;
+  font-size: 20px; font-weight: 800;
+  color: #f1f5f9; line-height: 1.35; letter-spacing: .3px;
+  overflow: hidden; text-overflow: ellipsis;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
 }
 
 .item-btn {
@@ -1239,26 +1032,19 @@ body {
   border: 1px solid rgba(56,189,248,.4);
   background: rgba(56,189,248,.12);
   color: #7dd3fc;
-  font-size: 20px;
-  cursor: pointer;
+  font-size: 20px; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: all .18s var(--ease-out);
-  font-family: inherit;
-  flex: 0 0 auto;
-  padding: 0;
+  font-family: inherit; flex: 0 0 auto; padding: 0;
 }
 .item-btn:active { transform: scale(.9); }
 .item-btn .item-count {
   position: absolute;
   top: -6px; right: -6px;
   min-width: 18px; height: 18px;
-  padding: 0 4px;
-  border-radius: 9px;
-  background: #fbbf24;
-  color: #1f1300;
-  font-size: 10px;
-  font-weight: 900;
-  line-height: 18px;
+  padding: 0 4px; border-radius: 9px;
+  background: #fbbf24; color: #1f1300;
+  font-size: 10px; font-weight: 900; line-height: 18px;
   text-align: center;
   box-shadow: 0 1px 4px rgba(0,0,0,.5);
   font-variant-numeric: tabular-nums;
@@ -1280,11 +1066,9 @@ body {
   border: 1px solid rgba(148,163,184,.25);
   background: rgba(148,163,184,.08);
   color: var(--txt-dim);
-  font-size: 20px;
-  line-height: 1;
+  font-size: 20px; line-height: 1;
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  flex: 0 0 auto;
+  cursor: pointer; flex: 0 0 auto;
   transition: all .22s var(--ease-out);
   font-family: inherit;
 }
@@ -1298,29 +1082,22 @@ body {
 
 .phon-bubble {
   position: absolute;
-  top: 100px;
-  left: 50%;
+  top: 100px; left: 50%;
   transform: translateX(-50%) translateY(-6px);
-  padding: 6px 16px;
-  border-radius: 999px;
+  padding: 6px 16px; border-radius: 999px;
   background: rgba(56,189,248,.16);
   border: 1px solid rgba(56,189,248,.45);
   color: #7dd3fc;
   font-size: 16px;
   font-family: "Lucida Sans Unicode", "Segoe UI", sans-serif;
   letter-spacing: .3px;
-  opacity: 0;
-  pointer-events: none;
+  opacity: 0; pointer-events: none;
   transition: opacity .28s ease, transform .28s ease;
-  z-index: 10;
-  white-space: nowrap;
+  z-index: 10; white-space: nowrap;
   box-shadow: 0 4px 14px rgba(0,0,0,.5), 0 0 18px rgba(56,189,248,.3);
   font-weight: 600;
 }
-.phon-bubble.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
+.phon-bubble.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 .q-area {
   margin-top: 2px;
@@ -1329,12 +1106,9 @@ body {
   border-radius: 16px;
   padding: 24px 20px;
   min-height: 140px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  display: flex; flex-direction: column; justify-content: center;
   box-shadow: inset 0 2px 10px rgba(0,0,0,.28);
-  position: relative;
-  overflow: hidden;
+  position: relative; overflow: hidden;
 }
 .q-area::before {
   content: '';
@@ -1343,59 +1117,46 @@ body {
 }
 .q-en {
   font-size: clamp(18px, 5vw, 22px);
-  line-height: 1.9;
-  color: #e8edf5;
-  margin-bottom: 12px;
-  word-break: break-word;
-  letter-spacing: .3px;
+  line-height: 1.9; color: #e8edf5;
+  margin-bottom: 12px; word-break: break-word; letter-spacing: .3px;
 }
 .q-cn {
   font-size: clamp(14px, 4vw, 16px);
-  color: var(--txt-dim);
-  margin-bottom: 2px;
+  color: var(--txt-dim); margin-bottom: 2px;
 }
 
 .blank {
   display: inline-block;
   border-bottom: 3px solid var(--green);
-  text-align: center;
-  font-weight: 800;
+  text-align: center; font-weight: 800;
   color: #f8fafc;
-  padding: 0 12px;
-  min-width: 100px;
-  vertical-align: middle;
-  min-height: 1.35em;
+  padding: 0 12px; min-width: 100px;
+  vertical-align: middle; min-height: 1.35em;
   letter-spacing: .8px;
   transition: color .15s, border-color .15s;
 }
 .blank .caret {
   display: inline-block;
-  width: 3px;
-  height: 1em;
+  width: 3px; height: 1em;
   background: var(--green);
-  vertical-align: -2px;
-  margin-left: 2px;
+  vertical-align: -2px; margin-left: 2px;
   border-radius: 1px;
   animation: blink 1s step-end infinite;
 }
 @keyframes blink { 50% { opacity: 0; } }
 
-/* =========================================================
-   反馈区：高度平滑过渡（不锁死最小高度，用 WAAPI 动画 height）
-   ========================================================= */
+/* 反馈区：高度平滑过渡 */
 .feedback {
   margin-top: 0;
   padding: 0 18px;
   border-radius: 12px;
-  font-size: 16px;
-  line-height: 1.6;
+  font-size: 16px; line-height: 1.6;
   display: block;
   opacity: 0;
   overflow: hidden;
   box-sizing: border-box;
   border: 1px solid transparent;
-  transition: margin-top .3s cubic-bezier(.22,1,.36,1),
-              opacity .25s ease;
+  transition: margin-top .3s cubic-bezier(.22,1,.36,1), opacity .25s ease;
 }
 .feedback.ok, .feedback.err {
   margin-top: 16px;
@@ -1424,16 +1185,12 @@ body {
 }
 .key {
   position: relative;
-  height: 52px;
-  border-radius: 12px;
+  height: 52px; border-radius: 12px;
   background: linear-gradient(180deg, rgba(51,65,85,.94), rgba(30,41,59,.98));
   color: #e2e8f0;
-  font-size: 22px;
-  font-weight: 800;
+  font-size: 22px; font-weight: 800;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   border: 1px solid rgba(148,163,184,.12);
   box-shadow: 
     inset 0 1px 0 rgba(255,255,255,.1),
@@ -1441,8 +1198,7 @@ body {
     0 2px 0 rgba(0,0,0,.42),
     0 3px 6px rgba(0,0,0,.25);
   transition: transform .08s ease, box-shadow .08s ease, background .15s ease, color .15s ease, border-color .15s ease;
-  font-family: inherit;
-  overflow: hidden;
+  font-family: inherit; overflow: hidden;
 }
 .key:active {
   transform: translateY(2px);
@@ -1454,62 +1210,33 @@ body {
   color: #fff;
   border-color: rgba(56,189,248,.35);
 }
-
 .key.hint {
   background: linear-gradient(180deg, rgba(251,191,36,.55), rgba(180,83,9,.85));
   color: #fff;
   border-color: rgba(251,191,36,.72);
   text-shadow: 0 1px 2px rgba(0,0,0,.35);
-  animation: keyHintPulse 1.2s ease-in-out infinite;
 }
-@keyframes keyHintPulse {
-  0%,100% { 
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 0 8px rgba(251,191,36,.4), 0 2px 0 rgba(0,0,0,.4); 
-  }
-  50% { 
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 0 18px rgba(251,191,36,.75), 0 2px 0 rgba(0,0,0,.4); 
-  }
-}
-.key.hint:active {
-  background: linear-gradient(180deg, rgba(251,191,36,.75), rgba(180,83,9,.95));
-}
-
 .key.del {
   background: linear-gradient(180deg, rgba(51,65,85,.94), rgba(30,41,59,.98));
   color: #fca5a5;
-  font-size: 22px;
   border: 1px solid rgba(239,68,68,.28);
-  box-shadow: 
-    inset 0 1px 0 rgba(255,255,255,.08),
-    inset 0 -1px 0 rgba(0,0,0,.22),
-    0 2px 0 rgba(0,0,0,.42),
-    0 3px 6px rgba(0,0,0,.25);
 }
 .key.del:active {
   background: linear-gradient(180deg, rgba(239,68,68,.62), rgba(127,29,29,.95));
   color: #fff;
   border-color: rgba(239,68,68,.62);
-  box-shadow: 
-    inset 0 1px 0 rgba(255,255,255,.15),
-    inset 0 1px 6px rgba(0,0,0,.3),
-    0 0 0 rgba(0,0,0,.42);
 }
-
 .key.space {
   grid-column: span 2;
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--txt-dim);
-  letter-spacing: 1px;
+  font-size: 15px; font-weight: 700;
+  color: var(--txt-dim); letter-spacing: 1px;
   background: linear-gradient(180deg, rgba(41,54,73,.85), rgba(24,33,48,.95));
 }
-
 .key.confirm {
   grid-column: span 6;
   background: linear-gradient(180deg, #38bdf8 0%, #0ea5e9 52%, #0369a1 100%);
   color: #fff;
-  font-size: 20px;
-  font-weight: 900;
+  font-size: 20px; font-weight: 900;
   letter-spacing: 3px;
   border: 1px solid rgba(125,211,252,.42);
   box-shadow: 
@@ -1522,26 +1249,28 @@ body {
 .key.confirm:active {
   transform: translateY(2px);
   background: linear-gradient(180deg, #0ea5e9 0%, #0369a1 100%);
-  border-color: rgba(125,211,252,.35);
   box-shadow: 
     inset 0 1px 0 rgba(255,255,255,.28),
     inset 0 2px 8px rgba(7,45,80,.35),
     0 1px 0 rgba(3,45,80,.9);
 }
-.key.confirm::after {
+/* 扫光改为 transform（合成层，不重绘） */
+.key.confirm::after,
+.btn-primary::after,
+.splash-start::after {
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: 12px;
-  background: linear-gradient(110deg, transparent 34%, rgba(255,255,255,.35) 50%, transparent 66%);
-  background-size: 220% 100%;
-  background-position: 160% 0;
-  animation: shineSweep 3.4s ease-in-out infinite;
+  border-radius: inherit;
+  background: linear-gradient(110deg, transparent 34%, rgba(255,255,255,.42) 50%, transparent 66%);
   pointer-events: none;
+  transform: translateX(150%);
+  animation: shineSlide 3.4s ease-in-out infinite;
+  will-change: transform;
 }
-@keyframes shineSweep {
-  0%, 55% { background-position: 160% 0; }
-  100% { background-position: -60% 0; }
+@keyframes shineSlide {
+  0%, 55% { transform: translateX(150%); }
+  100%    { transform: translateX(-150%); }
 }
 
 /* =========================================================
@@ -1549,9 +1278,7 @@ body {
    ========================================================= */
 .result-mask {
   position: fixed; inset: 0; z-index: 600;
-  background: radial-gradient(circle at 50% 42%, rgba(30,27,75,.62) 0%, rgba(2,6,23,.9) 72%);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: radial-gradient(circle at 50% 42%, rgba(30,27,75,.85) 0%, rgba(2,6,23,.94) 72%);
   display: flex; align-items: center; justify-content: center;
   padding: 24px;
   opacity: 0; pointer-events: none;
@@ -1561,14 +1288,12 @@ body {
 
 .result-card {
   position: relative;
-  width: 100%;
-  max-width: 380px;
+  width: 100%; max-width: 380px;
   background: linear-gradient(180deg, #1b2540 0%, #0f172a 58%, #0b1220 100%);
   border: 1px solid rgba(251,191,36,.3);
   border-radius: 24px;
   padding: 32px 26px 26px;
-  text-align: center;
-  overflow: hidden;
+  text-align: center; overflow: hidden;
   box-shadow: 0 30px 80px rgba(0,0,0,.82), 0 0 70px rgba(251,191,36,.14), inset 0 1px 0 rgba(255,255,255,.08);
   transform: scale(.9) translateY(14px);
   opacity: 0;
@@ -1587,8 +1312,7 @@ body {
   border-radius: 50%;
   background: repeating-conic-gradient(from 0deg, rgba(251,191,36,.13) 0deg 7deg, transparent 7deg 21deg);
   animation: raysSpin 26s linear infinite;
-  pointer-events: none;
-  opacity: .75;
+  pointer-events: none; opacity: .75;
   -webkit-mask-image: radial-gradient(circle, #000 16%, transparent 68%);
   mask-image: radial-gradient(circle, #000 16%, transparent 68%);
 }
@@ -1599,9 +1323,7 @@ body {
 
 .result-icon-wrap {
   position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: inline-flex; align-items: center; justify-content: center;
   margin-bottom: 16px;
 }
 .result-icon-glow {
@@ -1620,8 +1342,7 @@ body {
 }
 .result-icon {
   position: relative;
-  font-size: 64px;
-  line-height: 1;
+  font-size: 64px; line-height: 1;
   filter: drop-shadow(0 6px 18px rgba(251,191,36,.55));
 }
 .result-card.lose .result-icon { filter: drop-shadow(0 6px 18px rgba(239,68,68,.55)); }
@@ -1635,11 +1356,8 @@ body {
 
 .result-badge {
   display: inline-block;
-  font-size: 14px;
-  font-weight: 900;
-  letter-spacing: 1.5px;
-  padding: 5px 15px;
-  border-radius: 999px;
+  font-size: 14px; font-weight: 900; letter-spacing: 1.5px;
+  padding: 5px 15px; border-radius: 999px;
   margin-bottom: 10px;
   background: rgba(251,191,36,.13);
   color: var(--gold);
@@ -1653,43 +1371,27 @@ body {
 }
 
 .result-title {
-  font-size: 22px;
-  font-weight: 900;
-  margin-bottom: 14px;
-  color: #f8fafc;
-  letter-spacing: .3px;
+  font-size: 22px; font-weight: 900; margin-bottom: 14px;
+  color: #f8fafc; letter-spacing: .3px;
 }
 .result-card.lose .result-title { color: #fecaca; }
 
 .result-stars {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 20px;
-  min-height: 28px;
+  display: flex; justify-content: center; gap: 8px;
+  margin-bottom: 20px; min-height: 28px;
 }
 .result-star {
-  font-size: 28px;
-  line-height: 1;
+  font-size: 28px; line-height: 1;
   filter: drop-shadow(0 0 9px rgba(251,191,36,.75));
 }
-.result-mask.show .result-star {
-  animation: starPop .5s var(--ease-spring) both;
-}
-.result-star.off {
-  filter: grayscale(1) brightness(.36);
-  opacity: .55;
-}
+.result-mask.show .result-star { animation: starPop .5s var(--ease-spring) both; }
+.result-star.off { filter: grayscale(1) brightness(.36); opacity: .55; }
 @keyframes starPop {
   0% { transform: scale(0) rotate(-40deg); opacity: 0; }
   100% { transform: scale(1) rotate(0); opacity: 1; }
 }
 
-.result-stats {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 24px;
-}
+.result-stats { display: flex; gap: 10px; margin-bottom: 24px; }
 .result-stat {
   flex: 1;
   background: linear-gradient(180deg, rgba(148,163,184,.1), rgba(148,163,184,.04));
@@ -1698,9 +1400,7 @@ body {
   border: 1px solid rgba(148,163,184,.16);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
 }
-.result-mask.show .result-stat {
-  animation: statIn .42s var(--ease-out) both;
-}
+.result-mask.show .result-stat { animation: statIn .42s var(--ease-out) both; }
 .result-stat:nth-child(1) { animation-delay: .34s; }
 .result-stat:nth-child(2) { animation-delay: .44s; }
 .result-stat:nth-child(3) { animation-delay: .54s; }
@@ -1710,38 +1410,22 @@ body {
 }
 .result-stat b {
   display: block;
-  font-size: 24px;
-  font-weight: 900;
-  color: var(--gold);
-  margin-bottom: 4px;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -.5px;
+  font-size: 24px; font-weight: 900;
+  color: var(--gold); margin-bottom: 4px;
+  font-variant-numeric: tabular-nums; letter-spacing: -.5px;
 }
 .result-card.lose .result-stat b { color: #f87171; }
-.result-stat span {
-  font-size: 13px;
-  color: var(--txt-mute);
-  letter-spacing: .5px;
-}
+.result-stat span { font-size: 13px; color: var(--txt-mute); letter-spacing: .5px; }
 
-.result-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
+.result-actions { display: flex; flex-direction: column; gap: 12px; }
 .btn-primary {
   position: relative;
   padding: 16px;
-  border: none;
-  border-radius: 14px;
+  border: none; border-radius: 14px;
   background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 48%, #d97706 100%);
   color: #1f1300;
-  font-size: 18px;
-  font-weight: 900;
-  letter-spacing: 1.5px;
-  cursor: pointer;
-  overflow: hidden;
-  font-family: inherit;
+  font-size: 18px; font-weight: 900; letter-spacing: 1.5px;
+  cursor: pointer; overflow: hidden; font-family: inherit;
   border: 1px solid rgba(255,224,140,.4);
   box-shadow: 
     inset 0 1px 0 rgba(255,255,255,.55),
@@ -1749,17 +1433,6 @@ body {
     0 2px 0 rgba(146,64,14,.9),
     0 8px 26px rgba(245,158,11,.36);
   transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
-}
-.btn-primary::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 14px;
-  background: linear-gradient(110deg, transparent 34%, rgba(255,255,255,.5) 50%, transparent 66%);
-  background-size: 220% 100%;
-  background-position: 160% 0;
-  animation: shineSweep 3.2s ease-in-out infinite;
-  pointer-events: none;
 }
 .btn-primary:hover { filter: brightness(1.06); }
 .btn-primary:active {
@@ -1779,24 +1452,14 @@ body {
     0 2px 0 rgba(127,29,29,.9),
     0 8px 26px rgba(239,68,68,.4);
 }
-.result-card.lose .btn-primary:active {
-  box-shadow: 
-    inset 0 1px 0 rgba(255,255,255,.25),
-    inset 0 2px 8px rgba(127,29,29,.5),
-    0 1px 0 rgba(127,29,29,.9);
-}
-
 .btn-ghost {
   padding: 14px;
   border: 1px solid rgba(148,163,184,.28);
   border-radius: 14px;
   background: rgba(148,163,184,.06);
   color: var(--txt-dim);
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: .5px;
-  cursor: pointer;
-  font-family: inherit;
+  font-size: 16px; font-weight: 700; letter-spacing: .5px;
+  cursor: pointer; font-family: inherit;
   transition: all .18s var(--ease-out);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
 }
@@ -1819,13 +1482,10 @@ body {
 .splash-mask.hide { display: none; }
 .splash-card { text-align: center; max-width: 380px; width: 100%; }
 .splash-title {
-  font-size: 36px;
-  font-weight: 900;
-  letter-spacing: 4px;
+  font-size: 36px; font-weight: 900; letter-spacing: 4px;
   background: linear-gradient(90deg, #38bdf8, #a78bfa, #f472b6, #38bdf8);
   background-size: 300% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
+  -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: flowText 5s linear infinite;
   margin-bottom: 10px;
@@ -1834,23 +1494,11 @@ body {
   0% { background-position: 0% 50%; }
   100% { background-position: 300% 50%; }
 }
-.splash-sub {
-  font-size: 15px;
-  color: var(--txt-mute);
-  margin-bottom: 30px;
-  letter-spacing: .8px;
-}
+.splash-sub { font-size: 15px; color: var(--txt-mute); margin-bottom: 30px; letter-spacing: .8px; }
 
-.enemy-legend {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 24px;
-}
+.enemy-legend { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
 .legend-item {
-  display: flex;
-  align-items: center;
-  gap: 14px;
+  display: flex; align-items: center; gap: 14px;
   background: rgba(30,41,59,.6);
   border: 1px solid rgba(148,163,184,.14);
   border-radius: 14px;
@@ -1858,34 +1506,20 @@ body {
   text-align: left;
   transition: border-color .2s, background .2s;
 }
-.legend-item:hover {
-  background: rgba(30,41,59,.85);
-  border-color: rgba(148,163,184,.28);
-}
 .legend-orb {
   width: 40px; height: 40px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 20px;
-  flex: 0 0 auto;
-  position: relative;
+  font-size: 20px; flex: 0 0 auto; position: relative;
 }
 .legend-orb.blue   { background: radial-gradient(circle at 34% 30%, #7dd3fc, #0ea5e9 55%, #075985); box-shadow: 0 0 12px rgba(56,189,248,.7); }
 .legend-orb.orange { background: radial-gradient(circle at 34% 30%, #fdba74, #f97316 55%, #9a3412); box-shadow: 0 0 12px rgba(249,115,22,.7); }
 .legend-orb.red    { background: radial-gradient(circle at 34% 30%, #fca5a5, #ef4444 55%, #7f1d1d); box-shadow: 0 0 12px rgba(239,68,68,.7); }
-.legend-text b {
-  display: block;
-  font-size: 16px;
-  color: var(--txt);
-  margin-bottom: 4px;
-  font-weight: 800;
-}
+.legend-text b { display: block; font-size: 16px; color: var(--txt); margin-bottom: 4px; font-weight: 800; }
 .legend-text span { font-size: 14px; color: var(--txt-mute); }
 
 .splash-tip {
-  display: flex;
-  align-items: center;
-  gap: 14px;
+  display: flex; align-items: center; gap: 14px;
   background: rgba(251,191,36,.07);
   border: 1px solid rgba(251,191,36,.26);
   border-radius: 14px;
@@ -1901,27 +1535,19 @@ body {
   animation: ringGlow 1.4s ease-in-out infinite;
 }
 @keyframes ringGlow {
-  0%,100% { box-shadow: 0 0 0 0 rgba(251,191,36,0); opacity: .62; }
-  50% { box-shadow: 0 0 14px 3px rgba(251,191,36,.55); opacity: 1; }
+  0%,100% { opacity: .62; transform: scale(.95); }
+  50%     { opacity: 1;  transform: scale(1.08); }
 }
-.splash-tip span {
-  font-size: 14px;
-  color: rgba(251,191,36,.88);
-  line-height: 1.5;
-}
+.splash-tip span { font-size: 14px; color: rgba(251,191,36,.88); line-height: 1.5; }
 
 .splash-start {
   position: relative;
   width: 100%;
-  padding: 16px;
-  border-radius: 16px;
+  padding: 16px; border-radius: 16px;
   background: linear-gradient(180deg, #f59e0b 0%, #d97706 55%, #b45309 100%);
   color: #fff;
-  font-size: 20px;
-  font-weight: 900;
-  letter-spacing: 2px;
-  cursor: pointer;
-  overflow: hidden;
+  font-size: 20px; font-weight: 900; letter-spacing: 2px;
+  cursor: pointer; overflow: hidden;
   font-family: inherit;
   border: 1px solid rgba(255,224,140,.35);
   box-shadow: 
@@ -1930,17 +1556,6 @@ body {
     0 2px 0 rgba(146,64,14,.9),
     0 8px 26px rgba(245,158,11,.36);
   transition: transform .12s, box-shadow .12s, filter .12s;
-}
-.splash-start::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 16px;
-  background: linear-gradient(110deg, transparent 34%, rgba(255,255,255,.45) 50%, transparent 66%);
-  background-size: 220% 100%;
-  background-position: 160% 0;
-  animation: shineSweep 3.4s ease-in-out infinite;
-  pointer-events: none;
 }
 .splash-start:hover { filter: brightness(1.06); }
 .splash-start:active {
@@ -1952,55 +1567,39 @@ body {
 }
 .splash-reset {
   margin-top: 16px;
-  background: none;
-  border: none;
+  background: none; border: none;
   color: #475569;
-  font-size: 14px;
-  cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  font-size: 14px; cursor: pointer;
+  text-decoration: underline; text-underline-offset: 3px;
   font-family: inherit;
   transition: color .2s;
 }
 .splash-reset:hover { color: var(--txt-dim); }
 
-/* 退出登录 */
 .splash-logout {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
+  display: inline-flex; align-items: center; gap: 5px;
   margin-top: 12px;
-  background: none;
-  border: none;
+  background: none; border: none;
   color: #64748b;
-  font-size: 14px;
-  cursor: pointer;
-  font-family: inherit;
-  letter-spacing: .3px;
+  font-size: 14px; cursor: pointer;
+  font-family: inherit; letter-spacing: .3px;
   transition: color .2s, transform .2s;
 }
-.splash-logout span {
-  font-size: 13px;
-  opacity: .75;
-}
+.splash-logout span { font-size: 13px; opacity: .75; }
 .splash-logout:hover { color: #f87171; }
 .splash-logout:active { transform: scale(.96); }
 </style>
 </head>
 <body>
 
-<!-- ============ 原生风格自绘弹窗 (替代 alert / confirm) ============ -->
 <div class="app-modal-mask" id="appModalMask">
   <div class="app-modal-card">
     <div class="app-modal-title" id="appModalTitle">提示</div>
     <div class="app-modal-content" id="appModalContent">确定吗？</div>
-    <div class="app-modal-actions" id="appModalActions">
-      <!-- 按钮动态生成 -->
-    </div>
+    <div class="app-modal-actions" id="appModalActions"></div>
   </div>
 </div>
 
-<!-- ============ HUD ============ -->
 <div class="hud">
   <div class="level-badge" id="levelBadge">
     <span id="levelPrefix">第</span> <span id="levelNum">1</span> 关
@@ -2010,7 +1609,6 @@ body {
   <div class="enemy-count">本关剩 <b id="enemyLeft">20</b></div>
 </div>
 
-<!-- ============ 竞技场 ============ -->
 <div class="arena" id="arena">
   <div class="path-line"></div>
   <div class="ground"></div>
@@ -2026,19 +1624,18 @@ body {
   <div class="player" id="player">
     <div class="shield-aura"></div>
     <span class="shield-timer" id="shieldTimer">30s</span>
-    <span class="player-emoji">🧑</span>
+    <span class="player-emoji" id="playerAvatar">
+      <span class="pe-main">🧑</span>
+      <span class="pe-badge">🚀</span>
+    </span>
     <div class="item-bag" id="itemBag"></div>
     <div class="player-status">
       <span class="timer-badge" id="timerBadge">用时0秒</span>
-      
-      <!-- 血量条 -->
       <div class="status-label">
         <span>❤️ 血量</span>
         <span id="hpText">100/100</span>
       </div>
       <div class="player-hp"><div class="player-hp-fill" id="playerHpFill"></div></div>
-      
-      <!-- 连击槽 -->
       <div class="streak-bar-wrap" id="streakBarWrap">
         <div class="status-label" style="color:#fbbf24; margin-top:4px;">
           <span>⚡ 连击</span>
@@ -2060,12 +1657,10 @@ body {
   </button>
 </div>
 
-<!-- ============ 挑战弹窗 ============ -->
 <div class="modal-mask" id="modalMask">
   <div class="pause-hint-mask">敌人暂停攻击中</div>
   <div class="modal" id="modalBox">
     <div class="modal-grip"></div>
-
     <div class="modal-top">
       <div class="word-avatar blue" id="wordAvatar">
         <span id="avatarEmoji">👾</span>
@@ -2082,23 +1677,17 @@ body {
       </button>
       <button class="modal-close" onclick="closeChallenge()" aria-label="关闭">✕</button>
     </div>
-
     <div class="phon-bubble" id="phonBubble"></div>
-
     <div class="q-area" id="qArea"></div>
-
     <div class="feedback" id="fb"></div>
-
     <div class="keyboard" id="keyboard"></div>
   </div>
 </div>
 
-<!-- ============ 开场 ============ -->
 <div class="splash-mask" id="splashMask">
   <div class="splash-card">
     <div class="splash-title">单词夺宝</div>
     <div class="splash-sub">多多好学出品 @2026 版权所有</div>
-
     <div class="enemy-legend">
       <div class="legend-item">
         <div class="legend-orb blue">👾</div>
@@ -2113,12 +1702,10 @@ body {
         <div class="legend-text"><b>红色 · 拓展单词</b><span>慢箭狙击 · 伤害最高（8）　击破回血 +14</span></div>
       </div>
     </div>
-
     <div class="splash-tip">
       <div class="splash-tip-ring"></div>
       <span>金圈敌人藏惊喜，连续答对 5 题会掉落宝箱，战场也会随机掉落宝箱。</span>
     </div>
-
     <button class="splash-start" onclick="startGame()">开始闯关</button>
     <button class="splash-reset" onclick="resetProgress()">重置进度</button>
     <button class="splash-logout" onclick="logout()">
@@ -2127,26 +1714,21 @@ body {
   </div>
 </div>
 
-<!-- ============ 结算 ============ -->
 <div class="result-mask" id="resultMask">
   <div class="result-card" id="resultCard">
     <div class="result-rays"></div>
-
     <div class="result-icon-wrap">
       <div class="result-icon-glow"></div>
       <div class="result-icon" id="resultIcon">🏆</div>
     </div>
-
     <div class="result-badge" id="resultBadge">完美通关</div>
     <div class="result-title" id="resultTitle">第 1 关 · 夺宝成功</div>
     <div class="result-stars" id="resultStars"></div>
-
     <div class="result-stats">
       <div class="result-stat"><b id="rsKill">0</b><span>击破</span></div>
       <div class="result-stat"><b id="rsAcc">0%</b><span>正确率</span></div>
       <div class="result-stat"><b id="rsHp">100</b><span>剩余血量</span></div>
     </div>
-
     <div class="result-actions">
       <button class="btn-primary" id="resultMainBtn">下一关</button>
       <button class="btn-ghost" id="resultSubBtn">重玩本关</button>
@@ -2154,7 +1736,6 @@ body {
   </div>
 </div>
 
-<!-- ============ 词库 ============ -->
 <script src="gradewords.js?v=20261001"></script>
 <script>
 /* =========================================================
@@ -2190,7 +1771,6 @@ function loadStore() {
       const j = JSON.parse(raw);
       let items = j.items || { speaker: 0, highlight: 0 };
       if (items.firstLetter === undefined) items.firstLetter = 0;
-      
       return {
         level: j.level || 1,
         mastered: j.mastered || { basic: [], core: [], extra: [] },
@@ -2214,34 +1794,23 @@ function markMastered(tier, word) {
   if (!s.mastered[tier]) s.mastered[tier] = [];
   const w = (word || '').toLowerCase();
   if (w && !s.mastered[tier].includes(w)) s.mastered[tier].push(w);
-  STORE = s;
-  saveStore(s);
+  STORE = s; saveStore(s);
 }
-
 function addToReview(tier, word) {
   const s = loadStore();
   if (!s.review) s.review = { basic: [], core: [], extra: [] };
   if (!s.review[tier]) s.review[tier] = [];
   const w = (word || '').toLowerCase();
   if (w && !s.review[tier].includes(w)) s.review[tier].push(w);
-  STORE = s;
-  saveStore(s);
-  updateReviewCount();
+  STORE = s; saveStore(s); updateReviewCount();
 }
-
 function removeFromReview(tier, word) {
   const s = loadStore();
   if (!s.review || !s.review[tier]) return;
   const w = (word || '').toLowerCase();
   const idx = s.review[tier].indexOf(w);
-  if (idx > -1) {
-    s.review[tier].splice(idx, 1);
-    STORE = s;
-    saveStore(s);
-    updateReviewCount();
-  }
+  if (idx > -1) { s.review[tier].splice(idx, 1); STORE = s; saveStore(s); updateReviewCount(); }
 }
-
 function getReviewItems() {
   const s = loadStore();
   const items = [];
@@ -2255,7 +1824,6 @@ function getReviewItems() {
   });
   return items;
 }
-
 function updateReviewCount() {
   const s = loadStore();
   const total =
@@ -2265,11 +1833,9 @@ function updateReviewCount() {
   const el = document.getElementById('reviewCount');
   if (el) el.textContent = total;
 }
-
 function addKillCount() {
   const s = loadStore();
   s.totalKills = (s.totalKills || 0) + 1;
-
   if (s.speakerMilestone == null) s.speakerMilestone = 0;
   const diff = s.totalKills - s.speakerMilestone;
   if (diff >= 5) {
@@ -2283,39 +1849,27 @@ function addKillCount() {
       updateItemButtons();
     }, 420);
   }
-
-  STORE = s;
-  saveStore(s);
+  STORE = s; saveStore(s);
 }
-
 function getRank(total) {
   const sun  = Math.floor(total / 1000);
   const moon = Math.floor((total % 1000) / 100);
   const star = Math.floor((total % 100) / 20);
   return { sun: sun, moon: moon, star: star };
 }
-
 function addItem(type, n) {
   const s = loadStore();
   if (!s.items) s.items = { speaker: 0, highlight: 0, firstLetter: 0 };
   s.items[type] = (s.items[type] || 0) + (n || 1);
-  STORE = s;
-  saveStore(s);
-  updateItemBag();
-  updateItemButtons();
+  STORE = s; saveStore(s); updateItemBag(); updateItemButtons();
 }
-
 function useItem(type) {
   const s = loadStore();
   if (!s.items || (s.items[type] || 0) <= 0) return false;
   s.items[type]--;
-  STORE = s;
-  saveStore(s);
-  updateItemBag();
-  updateItemButtons();
+  STORE = s; saveStore(s); updateItemBag(); updateItemButtons();
   return true;
 }
-
 function updateItemBag() {
   const s = loadStore();
   const bag = document.getElementById('itemBag');
@@ -2329,34 +1883,20 @@ function updateItemBag() {
   if (fl > 0) html += '<span class="item-chip">💡<b>' + fl + '</b></span>';
   bag.innerHTML = html;
 }
-
 function updateItemButtons() {
   const s = loadStore();
   const sp = (s.items && s.items.speaker) || 0;
   const hl = (s.items && s.items.highlight) || 0;
   const fl = (s.items && s.items.firstLetter) || 0;
-  
   const speakerBtn = document.getElementById('speakerBtn');
   const highlightBtn = document.getElementById('highlightBtn');
   const firstLetterBtn = document.getElementById('firstLetterBtn');
-  
   const speakerCount = document.getElementById('speakerCount');
   const highlightCount = document.getElementById('highlightCount');
   const firstLetterCount = document.getElementById('firstLetterCount');
-  
-  if (speakerBtn) {
-    speakerBtn.style.opacity = sp > 0 ? '1' : '0.25';
-    speakerBtn.style.filter = sp > 0 ? 'none' : 'grayscale(1)';
-  }
-  if (highlightBtn) {
-    highlightBtn.style.opacity = hl > 0 ? '1' : '0.25';
-    highlightBtn.style.filter = hl > 0 ? 'none' : 'grayscale(1)';
-  }
-  if (firstLetterBtn) {
-    firstLetterBtn.style.opacity = fl > 0 ? '1' : '0.25';
-    firstLetterBtn.style.filter = fl > 0 ? 'none' : 'grayscale(1)';
-  }
-  
+  if (speakerBtn) { speakerBtn.style.opacity = sp > 0 ? '1' : '0.25'; speakerBtn.style.filter = sp > 0 ? 'none' : 'grayscale(1)'; }
+  if (highlightBtn) { highlightBtn.style.opacity = hl > 0 ? '1' : '0.25'; highlightBtn.style.filter = hl > 0 ? 'none' : 'grayscale(1)'; }
+  if (firstLetterBtn) { firstLetterBtn.style.opacity = fl > 0 ? '1' : '0.25'; firstLetterBtn.style.filter = fl > 0 ? 'none' : 'grayscale(1)'; }
   if (speakerCount) speakerCount.textContent = sp;
   if (highlightCount) highlightCount.textContent = hl;
   if (firstLetterCount) firstLetterCount.textContent = fl;
@@ -2378,7 +1918,6 @@ const IRREG = {
   heard:'hear',hurt:'hurt',cut:'cut',put:'put',let:'let',sold:'sell',
   teeth:'tooth',feet:'foot',men:'man',women:'woman',children:'child',leaves:'leaf'
 };
-
 function wordVariants(w) {
   w = w.toLowerCase();
   const vs = [w];
@@ -2390,10 +1929,7 @@ function wordVariants(w) {
     vs.push(w.slice(0, -1) + 'ing');
     vs.push(w + 's');
   } else {
-    vs.push(w + 's');
-    vs.push(w + 'es');
-    vs.push(w + 'ed');
-    vs.push(w + 'ing');
+    vs.push(w + 's'); vs.push(w + 'es'); vs.push(w + 'ed'); vs.push(w + 'ing');
   }
   if (w.length >= 3 && 'bcdfghjklmnpqrstvwxz'.includes(w[w.length - 1])
       && 'aeiou'.includes(w[w.length - 2]) && !'aeiou'.includes(w[w.length - 3])) {
@@ -2403,7 +1939,6 @@ function wordVariants(w) {
   for (const ir in IRREG) { if (IRREG[ir] === w) vs.push(ir); }
   return [...new Set(vs)];
 }
-
 function wordPat(w) {
   const wl = w.toLowerCase();
   if (wl === "sb's" || wl === "one's") return ["\\S+'s", '\\S+'];
@@ -2411,14 +1946,12 @@ function wordPat(w) {
   if (wl === 'doing') return ['\\w+ing', '\\b' + w + '\\b'];
   return wordVariants(w).map(v => '\\b' + v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b');
 }
-
 function cartesian(arrays) {
   if (!arrays.length) return [[]];
   const f = arrays[0], rest = arrays.slice(1), rc = cartesian(rest), out = [];
   for (const x of f) for (const r of rc) out.push([x].concat(r));
   return out;
 }
-
 function phrasePats(w) {
   if (w.indexOf('...') >= 0) {
     const parts = w.split('...').map(s => s.trim()).filter(Boolean);
@@ -2438,13 +1971,10 @@ function phrasePats(w) {
   }
   return out;
 }
-
 let _lastSeg = '';
 let _lastSegFirst = false;
-
 function makeBlank(en, word) {
-  _lastSeg = '';
-  _lastSegFirst = false;
+  _lastSeg = ''; _lastSegFirst = false;
   const pats = phrasePats(word);
   for (const p of pats) {
     const re = new RegExp(p, 'i');
@@ -2460,7 +1990,6 @@ function makeBlank(en, word) {
   const bw2 = (word.length + 2) * 14 + 20;
   return en + ' <span class="blank" id="blankSpace" style="min-width:' + bw2 + 'px"></span>';
 }
-
 function stripW(w) {
   if (w.length <= 4) return w;
   if (w.endsWith('ying')) return w.slice(0, -3) + 'y';
@@ -2471,13 +2000,11 @@ function stripW(w) {
   if (w.endsWith('s')) return w.slice(0, -1);
   return w;
 }
-
 function canonical(s) {
   return (s || '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ')
     .split(/\s+/).filter(Boolean)
     .map(w => IRREG[w] || stripW(w)).join(' ');
 }
-
 function isCorrect(typed, w, seg) {
   const tn = (typed || '').toLowerCase().replace(/\s+/g, ' ').trim();
   if (!tn) return false;
@@ -2488,7 +2015,7 @@ function isCorrect(typed, w, seg) {
 }
 
 /* =========================================================
-   3. 音效系统
+   3. 音效
    ========================================================= */
 let _actx = null;
 function ac() {
@@ -2498,7 +2025,6 @@ function ac() {
   if (_actx && _actx.state === 'suspended') _actx.resume();
   return _actx;
 }
-
 function beep(freq, dur, type, vol, delay) {
   const c = ac(); if (!c) return;
   const d = delay || 0;
@@ -2513,7 +2039,6 @@ function beep(freq, dur, type, vol, delay) {
     o.start(t); o.stop(t + dur + .02);
   } catch (e) {}
 }
-
 function sweep(f1, f2, dur, type, vol) {
   const c = ac(); if (!c) return;
   try {
@@ -2529,7 +2054,6 @@ function sweep(f1, f2, dur, type, vol) {
     o.start(t); o.stop(t + dur + .02);
   } catch (e) {}
 }
-
 function sfxKey()   { beep(1500, .035, 'square', .045); }
 function sfxGood()  { beep(660, .09, 'sine', .09); beep(990, .14, 'sine', .09, .085); }
 function sfxBad()   { beep(220, .12, 'sawtooth', .09); beep(160, .18, 'sawtooth', .09, .11); }
@@ -2563,34 +2087,19 @@ function sfxGo() {
   beep(1318, .18, 'triangle', .09, .16);
 }
 function sfxWinFanfare() {
-  const notes = [523.25, 659.25, 783.99, 1046.5, 1318.5];
-  notes.forEach((f, i) => beep(f, .22, 'triangle', .085, i * .105));
+  [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((f, i) => beep(f, .22, 'triangle', .085, i * .105));
   [523.25, 659.25, 783.99].forEach(f => beep(f, .55, 'sine', .05, .55));
 }
-function sfxLose() {
-  const notes = [392, 349.23, 293.66, 220];
-  notes.forEach((f, i) => beep(f, .3, 'sawtooth', .06, i * .135));
-}
+function sfxLose() { [392, 349.23, 293.66, 220].forEach((f, i) => beep(f, .3, 'sawtooth', .06, i * .135)); }
 function sfxStar()  { beep(1560, .06, 'sine', .07); beep(2080, .1, 'sine', .05, .05); }
-function sfxStreakWarn() {
-  beep(660, .08, 'triangle', .08);
-  beep(880, .1, 'triangle', .08, .08);
-}
-
-/* 宝箱音效 */
-function sfxChestDrop() {
-  sweep(220, 660, .35, 'sine', .05);
-  beep(330, .12, 'triangle', .05, .35);
-}
+function sfxStreakWarn() { beep(660, .08, 'triangle', .08); beep(880, .1, 'triangle', .08, .08); }
+function sfxChestDrop() { sweep(220, 660, .35, 'sine', .05); beep(330, .12, 'triangle', .05, .35); }
 function sfxChestOpen() {
-  const notes = [523.25, 659.25, 783.99, 1046.5, 1318.5, 1568];
-  notes.forEach((f, i) => beep(f, .11, 'triangle', .09, i * .055));
+  [523.25, 659.25, 783.99, 1046.5, 1318.5, 1568].forEach((f, i) => beep(f, .11, 'triangle', .09, i * .055));
   beep(2093, .18, 'sine', .06, .34);
   beep(2637, .22, 'sine', .05, .4);
 }
-function sfxChestVanished() {
-  sweep(880, 220, .3, 'sine', .04);
-}
+function sfxChestVanished() { sweep(880, 220, .3, 'sine', .04); }
 
 /* =========================================================
    4. 游戏状态与配置
@@ -2600,55 +2109,27 @@ const PLAYER_Y = 12;
 const TREASURE_Y = 88;
 
 const ENEMY_CFG = {
-  blue:   { speed: 5.5, yMin: 56, yMax: 82, wanderR: 15,
-            fireMin: 9,  fireMax: 15, aimProb: 0.40,
-            projSpeed: 32, projDmg: 4 },
-  orange: { speed: 9.5, yMin: 38, yMax: 78, wanderR: 35,
-            fireMin: 11, fireMax: 17, aimProb: 0.55,
-            projSpeed: 24, projDmg: 6 },
-  red:    { speed: 4.5, yMin: 42, yMax: 85, wanderR: 28,
-            fireMin: 13, fireMax: 20, aimProb: 0.70,
-            projSpeed: 17, projDmg: 8 }
+  blue:   { speed: 5.5, yMin: 56, yMax: 82, wanderR: 15, fireMin: 9,  fireMax: 15, aimProb: 0.40, projSpeed: 32, projDmg: 4 },
+  orange: { speed: 9.5, yMin: 38, yMax: 78, wanderR: 35, fireMin: 11, fireMax: 17, aimProb: 0.55, projSpeed: 24, projDmg: 6 },
+  red:    { speed: 4.5, yMin: 42, yMax: 85, wanderR: 28, fireMin: 13, fireMax: 20, aimProb: 0.70, projSpeed: 17, projDmg: 8 }
 };
 
 const G = {
-  running: false,
-  paused: false,
-  preparing: false,
-  rulePhase: false,
-  streak: 0,
-  hp: 100,
-  maxHp: 100,
-  enemies: [],
-  projectiles: [],
-  level: 1,
-  isReview: false,
-  reviewLevel: 1,
-  reviewTotalLevels: 1,
-  lastTs: 0,
-  killCount: 0,
-  answerCount: 0,
-  correctCount: 0,
-  over: false,
-  startTime: 0,
-  elapsed: 0,
-  shieldUntil: 0,
-  slowUntil: 0,
-  currentBg: '',
-  chestActive: false,
-  nextChestTime: 0,
-  bloatingEnemy: null,
-  bloatTime: 0,
-  pauseStartTime: 0,
-  pauseOffset: 0,
-  chests: [] // { el, createTime, life }
+  running: false, paused: false, preparing: false, rulePhase: false,
+  streak: 0, hp: 100, maxHp: 100,
+  enemies: [], projectiles: [], level: 1,
+  isReview: false, reviewLevel: 1, reviewTotalLevels: 1,
+  lastTs: 0, killCount: 0, answerCount: 0, correctCount: 0, over: false,
+  startTime: 0, elapsed: 0, shieldUntil: 0, slowUntil: 0,
+  currentBg: '', chestActive: false, nextChestTime: 0,
+  bloatingEnemy: null, bloatTime: 0,
+  pauseStartTime: 0, pauseOffset: 0, chests: []
 };
 
 const TOTAL_PER_LEVEL = 20;
 const COMPOSITION = { blue: 12, orange: 6, red: 2 };
 const HEAL = { blue: 6, orange: 10, red: 14 };
 const EMOJI = { blue: '👾', orange: '👹', red: '💀' };
-
 const MYSTERY_RATE = 0.22;
 const BG_LIST = ['bg-1', 'bg-2', 'bg-3', 'bg-4', 'bg-5'];
 
@@ -2669,6 +2150,7 @@ const TOTAL_LEVELS = (() => {
 
 let _lastTimerSec = -1;
 let _lastBuffKey = '';
+let _lastShieldSec = -1;
 let _lastRankKey = '';
 let _phonTimer = null;
 let _rulesTimers = [];
@@ -2685,120 +2167,81 @@ function shuffle(arr) {
   }
   return a;
 }
-
 function pickWords(pool, tier, n) {
   const mastered = (loadStore().mastered[tier] || []);
   const fresh = pool.filter(w => !mastered.includes((w.w || '').toLowerCase()));
   const a = shuffle(fresh);
   const result = [];
   while (result.length < n && a.length) result.push(a.pop());
-
   if (!result.length) {
     const b = shuffle(pool);
     while (result.length < n && b.length) result.push(b.pop());
   }
   return result;
 }
-
 function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
 function placeEnemies(list) {
   const cols = [12, 31, 50, 69, 88];
   const rows = [78, 66, 54, 42];
-
   list.forEach((e, i) => {
     const r = Math.floor(i / 5);
     const c = i % 5;
     const cfg = ENEMY_CFG[e.type];
-
     e.id = i;
-    e.x = cols[c];
-    e.y = rows[r % rows.length];
-    e.homeX = e.x;
-    e.homeY = e.y;
-
-    e.alive = true;
-    e.el = null;
-    e.aimLine = null;
-
+    e.x = cols[c]; e.y = rows[r % rows.length];
+    e.homeX = e.x; e.homeY = e.y;
+    e.alive = true; e.el = null; e.aimLine = null;
     e.speed = cfg.speed * (0.85 + Math.random() * 0.35);
-    e.tx = e.x;
-    e.ty = e.y;
-    e.wanderTimer = 0;
-
+    e.tx = e.x; e.ty = e.y; e.wanderTimer = 0;
     e.fireTimer = 1.0 + Math.random() * 1.5;
     e.nextAimed = Math.random() < cfg.aimProb;
     e.aimingPlayer = false;
   });
 }
-
 function buildLevel(levelNum) {
   const blueWords   = pickWords(GRADE_MAP.basic.data, 'basic', COMPOSITION.blue);
   const orangeWords = pickWords(GRADE_MAP.core.data,  'core',  COMPOSITION.orange);
   const redWords    = pickWords(GRADE_MAP.extra.data, 'extra', COMPOSITION.red);
-
   const list = [];
   blueWords.forEach(w   => list.push({ word: w, type: 'blue',   tier: 'basic',  mystery: false }));
   orangeWords.forEach(w => list.push({ word: w, type: 'orange', tier: 'core',   mystery: false }));
   redWords.forEach(w    => list.push({ word: w, type: 'red',    tier: 'extra',  mystery: false }));
-
   const mixed = shuffle(list);
-
   const mysteryCount = Math.min(6, Math.max(3, Math.round(mixed.length * MYSTERY_RATE)));
   const mysteryIdx = new Set();
   while (mysteryIdx.size < mysteryCount && mysteryIdx.size < mixed.length) {
     mysteryIdx.add(Math.floor(Math.random() * mixed.length));
   }
   mysteryIdx.forEach(i => { mixed[i].mystery = true; });
-
   placeEnemies(mixed);
   return mixed;
 }
-
 function buildReviewLevel(levelNum, items) {
   const start = (levelNum - 1) * TOTAL_PER_LEVEL;
   const slice = items.slice(start, start + TOTAL_PER_LEVEL);
   if (!slice.length) return [];
-
-  const list = slice.map(x => ({
-    word: x.word,
-    type: x.type,
-    tier: x.tier,
-    mystery: false
-  }));
-
+  const list = slice.map(x => ({ word: x.word, type: x.type, tier: x.tier, mystery: false }));
   const mixed = shuffle(list);
   placeEnemies(mixed);
   return mixed;
 }
-
 function pickReplacementWord(tier, oldWord) {
   const pool = (GRADE_MAP[tier] && GRADE_MAP[tier].data) || [];
   if (!pool.length) return null;
-
   const mastered = (loadStore().mastered[tier] || []);
   const used = new Set();
-  G.enemies.forEach(en => {
-    if (en.alive && en.word && en.word.w) used.add(en.word.w.toLowerCase());
-  });
+  G.enemies.forEach(en => { if (en.alive && en.word && en.word.w) used.add(en.word.w.toLowerCase()); });
   used.add((oldWord || '').toLowerCase());
-
   const candidates = pool.filter(w => {
     const k = (w.w || '').toLowerCase();
     return !used.has(k) && !mastered.includes(k);
   });
-
-  if (candidates.length) {
-    return candidates[Math.floor(Math.random() * candidates.length)];
-  }
-
+  if (candidates.length) return candidates[Math.floor(Math.random() * candidates.length)];
   const fallback = pool.filter(w => !used.has((w.w || '').toLowerCase()));
-  if (fallback.length) {
-    return fallback[Math.floor(Math.random() * fallback.length)];
-  }
+  if (fallback.length) return fallback[Math.floor(Math.random() * fallback.length)];
   return null;
 }
-
 function pickReplacementWordReview(currentWord) {
   const items = getReviewItems();
   const cur = (currentWord || '').toLowerCase();
@@ -2808,16 +2251,22 @@ function pickReplacementWordReview(currentWord) {
 }
 
 /* =========================================================
-   6. 渲染
+   6. 渲染 & 主循环
    ========================================================= */
 const entityLayer = document.getElementById('entityLayer');
 const arena = document.getElementById('arena');
 
+let _arenaW = 1, _arenaH = 1;
+function updateArenaSize() {
+  _arenaW = arena.clientWidth || 1;
+  _arenaH = arena.clientHeight || 1;
+}
+window.addEventListener('resize', updateArenaSize);
+setTimeout(updateArenaSize, 0);
+
 function escapeHtml(s) {
   return String(s == null ? '' : s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 function createEnemyEl(e) {
@@ -2825,17 +2274,14 @@ function createEnemyEl(e) {
   div.className = 'enemy ' + e.type + (e.mystery ? ' mystery' : '');
   div.style.left = e.x + '%';
   div.style.bottom = e.y + '%';
-
   const meaning = e.word.m || e.word.cn || '';
   div.innerHTML =
     '<div class="enemy-inner">' +
     '<div class="enemy-orb">' + EMOJI[e.type] +
     '<span class="enemy-tag">' + escapeHtml(meaning) + '</span>' +
     '</div></div>';
-
   div.style.setProperty('--d1', `-${Math.random() * 2}s`);
   div.style.setProperty('--d2', `-${Math.random() * 2}s`);
-
   div.addEventListener('click', ev => {
     ev.stopPropagation();
     if (G.preparing) return;
@@ -2858,44 +2304,45 @@ function clearEntities() {
   document.querySelectorAll('.proj').forEach(p => p.remove());
   document.getElementById('buffBar').innerHTML = '';
   document.getElementById('toastWrap').innerHTML = '';
-  
   G.chests.forEach(c => { if(c.el) c.el.remove(); });
   G.chests = [];
   G.chestActive = false;
   G.bloatingEnemy = null;
 }
 
+/* 关键优化：只在运行中同步，且只在变化时写 style */
 function syncEntities() {
-  const W = arena.clientWidth || 1;
-  const H = arena.clientHeight || 1;
+  if (!G.running || G.paused || G.preparing || G.over) return;
+
+  const W = _arenaW, H = _arenaH;
   const px = PLAYER_X / 100 * W;
   const py = (1 - PLAYER_Y / 100) * H;
 
   for (const e of G.enemies) {
     if (!e.el) continue;
     if (!e.alive) {
-      e.el.style.display = 'none';
-      if (e.aimLine) e.aimLine.style.display = 'none';
+      if (e.el.style.display !== 'none') e.el.style.display = 'none';
+      if (e.aimLine && e.aimLine.style.display !== 'none') e.aimLine.style.display = 'none';
       continue;
     }
-
-    e.el.style.left = e.x + '%';
-    e.el.style.bottom = e.y + '%';
+    const lx = e.x + '%', ly = e.y + '%';
+    if (e.el.style.left !== lx) e.el.style.left = lx;
+    if (e.el.style.bottom !== ly) e.el.style.bottom = ly;
     e.el.classList.toggle('aiming', e.aimingPlayer);
 
     if (e.aimLine) {
       if (e.aimingPlayer) {
         const ex = e.x / 100 * W;
         const ey = (1 - e.y / 100) * H;
-        const lx = px - ex, ly = py - ey;
-        const len = Math.hypot(lx, ly);
-        const ang = Math.atan2(ly, lx) * 180 / Math.PI;
+        const lx2 = px - ex, ly2 = py - ey;
+        const len = Math.hypot(lx2, ly2);
+        const ang = Math.atan2(ly2, lx2) * 180 / Math.PI;
         e.aimLine.style.left = ex + 'px';
         e.aimLine.style.top = ey + 'px';
         e.aimLine.style.width = len + 'px';
         e.aimLine.style.transform = 'rotate(' + ang + 'deg)';
-        e.aimLine.style.display = 'block';
-      } else {
+        if (e.aimLine.style.display !== 'block') e.aimLine.style.display = 'block';
+      } else if (e.aimLine.style.display !== 'none') {
         e.aimLine.style.display = 'none';
       }
     }
@@ -2903,21 +2350,18 @@ function syncEntities() {
 
   for (const p of G.projectiles) {
     if (!p.el) continue;
-    p.el.style.left = p.x + '%';
-    p.el.style.bottom = p.y + '%';
+    const lx = p.x + '%', ly = p.y + '%';
+    if (p.el.style.left !== lx) p.el.style.left = lx;
+    if (p.el.style.bottom !== ly) p.el.style.bottom = ly;
   }
 }
 
-/* =========================================================
-   7. 主循环
-   ========================================================= */
 function formatTime(ms) {
   const total = Math.floor(ms / 1000);
   const m = Math.floor(total / 60);
   const s = total % 60;
   return m > 0 ? ('用时' + m + '分' + s + '秒') : ('用时' + s + '秒');
 }
-
 function updateTimerDisplay() {
   const sec = Math.floor(G.elapsed / 1000);
   if (sec === _lastTimerSec) return;
@@ -2925,40 +2369,35 @@ function updateTimerDisplay() {
   const el = document.getElementById('timerBadge');
   if (el) el.textContent = formatTime(G.elapsed);
 }
-
 function updateBuffBar() {
   const now = performance.now();
   const items = [];
-  if (now < G.shieldUntil) {
-    items.push({ cls: '', icon: '🛡️', text: '护盾 ' + Math.ceil((G.shieldUntil - now) / 1000) + 's' });
-  }
-  if (now < G.slowUntil) {
-    items.push({ cls: 'slow', icon: '🐢', text: '敌缓 ' + Math.ceil((G.slowUntil - now) / 1000) + 's' });
-  }
+  const shieldOn = now < G.shieldUntil;
+  const slowOn = now < G.slowUntil;
+  if (shieldOn) items.push({ cls: '', icon: '🛡️', text: '护盾 ' + Math.ceil((G.shieldUntil - now) / 1000) + 's' });
+  if (slowOn)   items.push({ cls: 'slow', icon: '🐢', text: '敌缓 ' + Math.ceil((G.slowUntil - now) / 1000) + 's' });
 
   const playerEl = document.getElementById('player');
-  if (playerEl) playerEl.classList.toggle('shielded', now < G.shieldUntil);
+  if (playerEl) playerEl.classList.toggle('shielded', shieldOn);
 
   const st = document.getElementById('shieldTimer');
   if (st) {
-    if (now < G.shieldUntil) {
-      st.textContent = Math.ceil((G.shieldUntil - now) / 1000) + 's';
-    } else {
-      st.textContent = '';
+    const sec = shieldOn ? Math.ceil((G.shieldUntil - now) / 1000) : -1;
+    if (sec !== _lastShieldSec) {
+      _lastShieldSec = sec;
+      st.textContent = sec >= 0 ? sec + 's' : '';
     }
   }
 
   const key = items.map(i => i.text).join('|');
   if (key === _lastBuffKey) return;
   _lastBuffKey = key;
-
   const bar = document.getElementById('buffBar');
   if (!bar) return;
   bar.innerHTML = items.map(i =>
     '<div class="buff-chip ' + i.cls + '"><i>' + i.icon + '</i>' + i.text + '</div>'
   ).join('');
 }
-
 function updateStreakBar() {
   const wrap = document.getElementById('streakBarWrap');
   const fill = document.getElementById('streakBarFill');
@@ -2974,19 +2413,15 @@ function updateStreakBar() {
     text.textContent = '0/5';
   }
 }
-
 function updateHUD() {
   const pct = Math.max(0, G.hp / G.maxHp * 100);
   const fill = document.getElementById('playerHpFill');
   if (fill) fill.style.width = pct + '%';
-  
   const hpText = document.getElementById('hpText');
   if (hpText) hpText.textContent = Math.round(G.hp) + '/' + G.maxHp;
-
   const left = G.enemies.filter(e => e.alive).length;
   const el = document.getElementById('enemyLeft');
   if (el) el.textContent = left;
-
   updateRankHUD();
   updateItemBag();
 }
@@ -3000,7 +2435,6 @@ function loop(ts) {
     updateTimerDisplay();
     updateBuffBar();
   }
-
   if (G.running && !G.paused && !G.preparing && !G.over) {
     update(dt);
   }
@@ -3018,22 +2452,15 @@ function pickWanderTarget(e) {
     e.ty = clamp(cfg.yMin + Math.random() * (cfg.yMax - cfg.yMin), cfg.yMin, cfg.yMax);
   }
 }
-
 function wanderEnemy(e, dt) {
-  const dx = e.tx - e.x;
-  const dy = e.ty - e.y;
+  const dx = e.tx - e.x, dy = e.ty - e.y;
   const d = Math.hypot(dx, dy);
-
   if (d < 1.2) {
     e.wanderTimer += dt;
-    if (e.wanderTimer > 0.35) {
-      e.wanderTimer = 0;
-      pickWanderTarget(e);
-    }
+    if (e.wanderTimer > 0.35) { e.wanderTimer = 0; pickWanderTarget(e); }
   } else {
     const sp = Math.min(e.speed * dt, d);
-    e.x += dx / d * sp;
-    e.y += dy / d * sp;
+    e.x += dx / d * sp; e.y += dy / d * sp;
     e.wanderTimer = 0;
   }
   e.x = clamp(e.x, 6, 94);
@@ -3045,20 +2472,17 @@ function update(dt) {
   const slowOn = now < G.slowUntil;
   const shieldOn = now < G.shieldUntil;
   const baseFireFactor = slowOn ? 0.42 : 1;
-  
+
   const aliveEnemies = G.enemies.filter(e => e.alive);
   const aliveCount = aliveEnemies.length;
-  
   const densityBoost = aliveCount > 0 ? Math.max(1, 15 / aliveCount) : 1;
   const fireFactor = baseFireFactor * densityBoost;
 
   for (const e of aliveEnemies) {
     wanderEnemy(e, dt);
-
     const cfg = ENEMY_CFG[e.type];
     e.fireTimer -= dt * fireFactor;
     e.aimingPlayer = e.nextAimed && e.fireTimer < 0.8 && e.fireTimer > 0;
-
     if (e.fireTimer <= 0) {
       spawnProjectile(e, e.nextAimed, cfg.projSpeed, cfg.projDmg, e.type);
       e.fireTimer = cfg.fireMin + Math.random() * (cfg.fireMax - cfg.fireMin);
@@ -3067,7 +2491,6 @@ function update(dt) {
     }
   }
 
-  // 精英怪触发
   if (aliveCount <= 15 && aliveCount > 0 && !G.bloatingEnemy) {
     const target = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
     G.bloatingEnemy = target;
@@ -3076,25 +2499,19 @@ function update(dt) {
     showToast('🔥', '发现不稳定的能量源！', '120秒内击破有重赏，超时将分裂！', '#ef4444');
     beep(600, 0.2, 'sawtooth', 0.1);
   }
-  
   if (G.bloatingEnemy) {
-    if (!G.bloatingEnemy.alive) {
-      G.bloatingEnemy = null;
-    } else {
+    if (!G.bloatingEnemy.alive) { G.bloatingEnemy = null; }
+    else {
       G.bloatTime += dt;
-      if (G.bloatTime >= 120) {
-        explodeEnemy(G.bloatingEnemy);
-      }
+      if (G.bloatTime >= 120) explodeEnemy(G.bloatingEnemy);
     }
   }
 
   for (const p of G.projectiles) {
     p.x += p.vx * dt;
     p.y += p.vy * dt;
-    const dx = p.x - PLAYER_X;
-    const dy = p.y - PLAYER_Y;
+    const dx = p.x - PLAYER_X, dy = p.y - PLAYER_Y;
     const dist = Math.hypot(dx, dy);
-
     if (shieldOn && dist < 8) {
       p.dead = true;
       spawnShieldShatter(p.x, p.y);
@@ -3103,16 +2520,13 @@ function update(dt) {
       p.dead = true;
       damagePlayer(p.dmg, p);
     }
-
     if (p.x < -12 || p.x > 112 || p.y < -12 || p.y > 112) p.dead = true;
   }
-
   G.projectiles = G.projectiles.filter(p => {
     if (p.dead) { if (p.el) p.el.remove(); return false; }
     return true;
   });
 
-  // 宝箱存活检测
   const pausedDur = G.pauseOffset;
   for (let i = G.chests.length - 1; i >= 0; i--) {
     const c = G.chests[i];
@@ -3132,32 +2546,19 @@ function update(dt) {
 }
 
 /* =========================================================
-   8. 战斗
+   7. 战斗
    ========================================================= */
 function spawnProjectile(fromEnemy, aimed, speed, dmg, type) {
   let tx, ty;
-  if (aimed) {
-    tx = PLAYER_X;
-    ty = PLAYER_Y;
-  } else {
-    tx = clamp(fromEnemy.x + (Math.random() - 0.5) * 110, -15, 115);
-    ty = -12;
-  }
-
-  const dx = tx - fromEnemy.x;
-  const dy = ty - fromEnemy.y;
+  if (aimed) { tx = PLAYER_X; ty = PLAYER_Y; }
+  else { tx = clamp(fromEnemy.x + (Math.random() - 0.5) * 110, -15, 115); ty = -12; }
+  const dx = tx - fromEnemy.x, dy = ty - fromEnemy.y;
   const d = Math.hypot(dx, dy) || 1;
-
   const p = {
-    x: fromEnemy.x,
-    y: fromEnemy.y,
-    vx: dx / d * speed,
-    vy: dy / d * speed,
-    dmg: dmg || 6,
-    dead: false,
-    el: null
+    x: fromEnemy.x, y: fromEnemy.y,
+    vx: dx / d * speed, vy: dy / d * speed,
+    dmg: dmg || 6, dead: false, el: null
   };
-
   const el = document.createElement('div');
   el.className = 'proj ' + type;
   el.style.left = p.x + '%';
@@ -3165,31 +2566,21 @@ function spawnProjectile(fromEnemy, aimed, speed, dmg, type) {
   arena.appendChild(el);
   p.el = el;
   G.projectiles.push(p);
-
   beep(type === 'red' ? 480 : type === 'orange' ? 700 : 950, .05, 'square', .03);
 }
-
 function damagePlayer(n, src) {
   if (G.over) return;
   G.hp = Math.max(0, G.hp - n);
   updateHUD();
-  sfxHit();
-  flashScreen();
-  popDamage(n);
+  sfxHit(); flashScreen(); popDamage(n);
   if (G.hp <= 0) gameOver();
 }
-
 function healPlayer(n) {
   const before = G.hp;
   G.hp = Math.min(G.maxHp, G.hp + n);
   const got = Math.round(G.hp - before);
-  if (got > 0) {
-    updateHUD();
-    sfxHeal();
-    popHeal(got);
-  }
+  if (got > 0) { updateHUD(); sfxHeal(); popHeal(got); }
 }
-
 function popDamage(n) {
   const el = document.createElement('div');
   el.className = 'dmg-pop';
@@ -3199,7 +2590,6 @@ function popDamage(n) {
   arena.appendChild(el);
   setTimeout(() => el.remove(), 950);
 }
-
 function popHeal(n) {
   const el = document.createElement('div');
   el.className = 'heal-pop';
@@ -3209,14 +2599,11 @@ function popHeal(n) {
   arena.appendChild(el);
   setTimeout(() => el.remove(), 950);
 }
-
 function spawnShieldShatter(xPct, yPct) {
   spawnParticles(xPct, yPct, '#38bdf8', 8);
-
   const rect = arena.getBoundingClientRect();
   const cx = rect.left + rect.width * xPct / 100;
   const cy = rect.top + rect.height * (1 - yPct / 100);
-
   const ring = document.createElement('div');
   ring.className = 'shield-shatter';
   ring.style.left = cx + 'px';
@@ -3224,7 +2611,6 @@ function spawnShieldShatter(xPct, yPct) {
   document.body.appendChild(ring);
   setTimeout(() => ring.remove(), 550);
 }
-
 let _overlay = null;
 function flashScreen() {
   if (!_overlay) {
@@ -3237,7 +2623,6 @@ function flashScreen() {
   _overlay.classList.add('flash');
   setTimeout(() => _overlay && _overlay.classList.remove('flash'), 520);
 }
-
 function spawnParticles(xPct, yPct, color, count) {
   const rect = arena.getBoundingClientRect();
   const cx = rect.left + rect.width * xPct / 100;
@@ -3249,8 +2634,7 @@ function spawnParticles(xPct, yPct, color, count) {
     s.className = 'particle';
     s.textContent = icons[Math.floor(Math.random() * icons.length)];
     s.style.color = color;
-    s.style.left = cx + 'px';
-    s.style.top = cy + 'px';
+    s.style.left = cx + 'px'; s.style.top = cy + 'px';
     const ang = Math.random() * Math.PI * 2;
     const dist = 40 + Math.random() * 70;
     s.style.setProperty('--dx', Math.cos(ang) * dist + 'px');
@@ -3259,18 +2643,14 @@ function spawnParticles(xPct, yPct, color, count) {
     setTimeout(() => s.remove(), 1050);
   }
 }
-
 function explodeEnemy(e) {
   if (!e.alive || G.over) return;
-
   e.alive = false;
   if (e.el) e.el.style.display = 'none';
   spawnParticles(e.x, e.y, '#ef4444', 30);
   sfxHit();
   setTimeout(() => { sfxBad(); }, 150);
-  
   G.bloatingEnemy = null;
-  
   const count = 3 + Math.floor(Math.random() * 2);
   for (let i = 0; i < count; i++) {
     const type = ['blue', 'orange', 'red'][Math.floor(Math.random() * 3)];
@@ -3278,34 +2658,25 @@ function explodeEnemy(e) {
     const pool = GRADE_MAP[tier].data;
     const word = pool[Math.floor(Math.random() * pool.length)];
     const cfg = ENEMY_CFG[type];
-    
     const newE = {
       id: 'spawn_' + Date.now() + '_' + i,
-      word: word,
-      type: type,
-      tier: tier,
-      mystery: Math.random() < 0.2,
-      alive: true,
+      word: word, type: type, tier: tier,
+      mystery: Math.random() < 0.2, alive: true,
       x: clamp(e.x + (Math.random() - 0.5) * 30, 10, 90),
       y: clamp(e.y + (Math.random() - 0.5) * 30, 36, 86),
       speed: cfg.speed * (0.85 + Math.random() * 0.35),
       tx: 0, ty: 0, wanderTimer: 0,
       fireTimer: cfg.fireMin * (0.5 + Math.random() * 0.8),
       nextAimed: Math.random() < cfg.aimProb,
-      aimingPlayer: false,
-      el: null, aimLine: null
+      aimingPlayer: false, el: null, aimLine: null
     };
     newE.homeX = newE.x; newE.homeY = newE.y;
     newE.tx = newE.x; newE.ty = newE.y;
-    
     G.enemies.push(newE);
     createEnemyEl(newE);
-    
     if (newE.el) {
       const inner = newE.el.querySelector('.enemy-inner');
-      if (inner) {
-        inner.style.animation = 'spawnBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
-      }
+      if (inner) inner.style.animation = 'spawnBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
     }
   }
   updateHUD();
@@ -3313,7 +2684,7 @@ function explodeEnemy(e) {
 }
 
 /* =========================================================
-   9. 神秘宝物 / 障碍
+   8. 神秘宝物
    ========================================================= */
 function showToast(emoji, name, desc, color) {
   const wrap = document.getElementById('toastWrap');
@@ -3330,7 +2701,6 @@ function showToast(emoji, name, desc, color) {
   wrap.appendChild(el);
   setTimeout(() => el.remove(), 4600);
 }
-
 function randomBg() {
   let next = G.currentBg;
   let guard = 0;
@@ -3341,25 +2711,17 @@ function randomBg() {
   arena.classList.add(next);
   G.currentBg = next;
 }
-
 function reviveEnemies(exclude) {
   const dead = G.enemies.filter(e => !e.alive && e !== exclude);
   if (!dead.length) return 0;
-
   const n = Math.min(dead.length, 2 + Math.floor(Math.random() * 2));
   const picked = shuffle(dead).slice(0, n);
-
   picked.forEach(e => {
-    e.alive = true;
-    e.mystery = false;
+    e.alive = true; e.mystery = false;
     e.x = clamp(10 + Math.random() * 80, 10, 90);
     e.y = clamp(42 + Math.random() * 36, 42, 78);
-    e.tx = e.x;
-    e.ty = e.y;
-    e.wanderTimer = 0;
-    e.aimingPlayer = false;
+    e.tx = e.x; e.ty = e.y; e.wanderTimer = 0; e.aimingPlayer = false;
     e.fireTimer = ENEMY_CFG[e.type].fireMin * (0.7 + Math.random() * 0.6);
-
     if (e.el) {
       e.el.classList.remove('die', 'mystery', 'hit');
       e.el.style.display = '';
@@ -3368,119 +2730,75 @@ function reviveEnemies(exclude) {
       void e.el.offsetWidth;
     }
     if (e.aimLine) e.aimLine.style.display = 'none';
-
     spawnParticles(e.x, e.y, '#f59e0b', 10);
   });
-
   updateHUD();
   return picked.length;
 }
-
 function triggerMystery(enemy) {
   let pool = MYSTERY_EFFECTS.slice();
   if (!G.enemies.some(e => !e.alive && e !== enemy)) {
     pool = pool.filter(x => x.id !== 'revive');
   }
-
   const eff = pool[Math.floor(Math.random() * pool.length)];
   const now = performance.now();
-
   switch (eff.id) {
-    case 'shield':
-      G.shieldUntil = Math.max(G.shieldUntil, now) + 30000;
-      break;
-    case 'slow':
-      G.slowUntil = Math.max(G.slowUntil, now) + 20000;
-      break;
-    case 'bg':
-      randomBg();
-      break;
-    case 'revive':
-      reviveEnemies(enemy);
-      break;
-    case 'speaker':
-      addItem('speaker', 1);
-      break;
-    case 'highlight':
-      addItem('highlight', 1);
-      break;
-    case 'firstLetter':
-      addItem('firstLetter', 1);
-      break;
+    case 'shield': G.shieldUntil = Math.max(G.shieldUntil, now) + 30000; break;
+    case 'slow': G.slowUntil = Math.max(G.slowUntil, now) + 20000; break;
+    case 'bg': randomBg(); break;
+    case 'revive': reviveEnemies(enemy); break;
+    case 'speaker': addItem('speaker', 1); break;
+    case 'highlight': addItem('highlight', 1); break;
+    case 'firstLetter': addItem('firstLetter', 1); break;
   }
-
   showToast(eff.emoji, eff.name, eff.desc, eff.color);
   sfxMystery();
 }
 
 /* =========================================================
-   10. 宝箱系统
+   9. 宝箱
    ========================================================= */
 function spawnChest() {
   if (G.chests.length >= 1) return;
   G.chestActive = true;
-
   const chest = document.createElement('div');
   chest.className = 'chest';
-
   const leftPct = 22 + Math.random() * 56;
-
   chest.innerHTML =
     '<div class="chest-aura"></div>' +
     '<div class="chest-ring"></div>' +
     '<div class="chest-icon">🎁</div>';
-
   chest.style.left = leftPct + '%';
   chest.style.top = '-120px';
-
   arena.appendChild(chest);
-
   sfxChestDrop();
-
   requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      chest.style.top = '56%';
-    });
+    requestAnimationFrame(() => { chest.style.top = '56%'; });
   });
-
   chest.addEventListener('transitionend', function onLand(e) {
     if (e.propertyName !== 'top') return;
     chest.removeEventListener('transitionend', onLand);
     chest.classList.add('landed');
   });
-
   chest.addEventListener('click', (e) => {
     e.stopPropagation();
     if (chest.classList.contains('opened')) return;
     openChest(chest);
   });
-
-  const cObj = {
-    el: chest,
-    createTime: performance.now(),
-    life: 7.8,
-    opened: false
-  };
+  const cObj = { el: chest, createTime: performance.now(), life: 7.8, opened: false };
   G.chests.push(cObj);
 }
-
 function openChest(chestEl) {
   if (chestEl.classList.contains('opened')) return;
-  
   const cObj = G.chests.find(c => c.el === chestEl);
   if (cObj) cObj.opened = true;
-
-  chestEl.classList.remove('landed');
-  chestEl.classList.remove('paused');
+  chestEl.classList.remove('landed', 'paused');
   chestEl.style.animation = 'none';
   chestEl.classList.add('opened');
-
   sfxChestOpen();
-
   setTimeout(() => {
     const rect = chestEl.getBoundingClientRect();
     burstStars(rect.left + rect.width / 2, rect.top + rect.height / 2);
-
     chestEl.classList.add('burst');
     setTimeout(() => {
       if (chestEl.parentNode) chestEl.remove();
@@ -3488,37 +2806,29 @@ function openChest(chestEl) {
       if (idx > -1) G.chests.splice(idx, 1);
       if (G.chests.length === 0) G.chestActive = false;
     }, 520);
-
     grantChestTreasure();
   }, 380);
 }
-
 function burstStars(cx, cy) {
   const icons = ['⭐', '✨', '💫', '🌟', '✦', '★', '💎'];
   const colors = ['#fbbf24', '#38bdf8', '#f472b6', '#a78bfa', '#4ade80', '#fde68a'];
-
   for (let i = 0; i < 18; i++) {
     const s = document.createElement('div');
     s.className = 'burst-star';
     s.textContent = icons[Math.floor(Math.random() * icons.length)];
-    s.style.left = cx + 'px';
-    s.style.top = cy + 'px';
+    s.style.left = cx + 'px'; s.style.top = cy + 'px';
     s.style.color = colors[Math.floor(Math.random() * colors.length)];
     s.style.fontSize = (14 + Math.random() * 14) + 'px';
-
     const ang = Math.random() * Math.PI * 2;
     const dist = 60 + Math.random() * 110;
     s.style.setProperty('--dx', Math.cos(ang) * dist + 'px');
     s.style.setProperty('--dy', Math.sin(ang) * dist + 'px');
-
     document.body.appendChild(s);
     setTimeout(() => s.remove(), 1150);
   }
 }
-
 function grantChestTreasure() {
   const r = Math.random();
-
   if (r < 0.3) {
     G.shieldUntil = Math.max(G.shieldUntil, performance.now()) + 30000;
     showToast('🛡️', '护盾激活！', '30 秒内免疫所有攻击', '#38bdf8');
@@ -3532,90 +2842,60 @@ function grantChestTreasure() {
     addItem('firstLetter', 1);
     showToast('💡', '获得首字母提示 ×1', '填词时自动填入首字母', '#c4b5fd');
   }
-
   sfxMystery();
 }
 
 /* =========================================================
-   11. 规则面板
+   10. 规则
    ========================================================= */
 const RULE_BATCHES = [
-  [
-    { text: '点击敌人 → 破解单词 → 答对击破', cls: '' },
-    { text: '答错自动放入复习仓，可点底部复习', cls: '' }
-  ],
-  [
-    { text: '金圈敌人藏惊喜或意外', cls: 'gold' },
-    { text: '连续答对 5 个，必定触发宝箱掉落', cls: 'blue' }
-  ],
-  [
-    { text: '战场上也会随机掉落宝箱，请注意点击', cls: 'blue' }
-  ]
+  [{ text: '点击敌人 → 破解单词 → 答对击破', cls: '' }, { text: '答错自动放入复习仓，可点底部复习', cls: '' }],
+  [{ text: '金圈敌人藏惊喜或意外', cls: 'gold' }, { text: '连续答对 5 个，必定触发宝箱掉落', cls: 'blue' }],
+  [{ text: '战场上也会随机掉落宝箱，请注意点击', cls: 'blue' }]
 ];
-
-function clearRuleTimers() {
-  _rulesTimers.forEach(t => clearTimeout(t));
-  _rulesTimers = [];
-}
-
+function clearRuleTimers() { _rulesTimers.forEach(t => clearTimeout(t)); _rulesTimers = []; }
 function showRules() {
   const panel = document.getElementById('rulesPanel');
   if (!panel) return;
-
   clearRuleTimers();
   panel.classList.remove('show');
   panel.innerHTML = '';
   G.rulePhase = true;
-
   let batchIndex = 0;
-
   function showBatch() {
     if (batchIndex >= RULE_BATCHES.length) {
       panel.classList.remove('show');
-      const t = setTimeout(() => {
-        panel.innerHTML = '';
-        G.rulePhase = false;
-      }, 500);
+      const t = setTimeout(() => { panel.innerHTML = ''; G.rulePhase = false; }, 500);
       _rulesTimers.push(t);
       return;
     }
-
     const batch = RULE_BATCHES[batchIndex];
     panel.innerHTML = batch.map((r, i) =>
       '<div class="rule-line ' + r.cls + '" style="animation-delay:' + (i * 0.32) + 's">' + r.text + '</div>'
     ).join('');
     panel.classList.add('show');
-
     const stayMs = Math.max(2400, batch.length * 1300 + 1200);
-
     const t1 = setTimeout(() => {
       panel.classList.remove('show');
-      const t2 = setTimeout(() => {
-        batchIndex++;
-        showBatch();
-      }, 480);
+      const t2 = setTimeout(() => { batchIndex++; showBatch(); }, 480);
       _rulesTimers.push(t2);
     }, stayMs);
     _rulesTimers.push(t1);
   }
-
   const t0 = setTimeout(showBatch, 200);
   _rulesTimers.push(t0);
 }
-
 function hideRules() {
   clearRuleTimers();
   const panel = document.getElementById('rulesPanel');
   if (!panel) { G.rulePhase = false; return; }
   panel.classList.remove('show');
   G.rulePhase = false;
-  setTimeout(() => {
-    if (!panel.classList.contains('show')) panel.innerHTML = '';
-  }, 500);
+  setTimeout(() => { if (!panel.classList.contains('show')) panel.innerHTML = ''; }, 500);
 }
 
 /* =========================================================
-   12. 挑战流程
+   11. 挑战流程
    ========================================================= */
 const modalMask = document.getElementById('modalMask');
 const qArea = document.getElementById('qArea');
@@ -3625,23 +2905,12 @@ const wordAvatar = document.getElementById('wordAvatar');
 const avatarEmoji = document.getElementById('avatarEmoji');
 const wordMeaning = document.getElementById('wordMeaning');
 
-let C = {
-  enemy: null,
-  typed: '',
-  seg: '',
-  segFirst: false,
-  answered: false
-};
+let C = { enemy: null, typed: '', seg: '', segFirst: false, answered: false };
 
-/* ---------- 反馈区：高度平滑过渡 ---------- */
 function setFeedback(cls, html) {
   if (!fbEl) return;
-  // 动画进行中：先按“当前视觉高度”记录起点，再取消旧动画
   const h0 = fbEl.getBoundingClientRect().height;
-  if (fbEl._hAnim) {
-    try { fbEl._hAnim.cancel(); } catch (e) {}
-    fbEl._hAnim = null;
-  }
+  if (fbEl._hAnim) { try { fbEl._hAnim.cancel(); } catch (e) {} fbEl._hAnim = null; }
   fbEl.className = 'feedback' + (cls ? ' ' + cls : '');
   fbEl.innerHTML = html || '';
   const h1 = fbEl.getBoundingClientRect().height;
@@ -3654,11 +2923,9 @@ function setFeedback(cls, html) {
     anim.onfinish = () => { if (fbEl._hAnim === anim) fbEl._hAnim = null; };
   }
 }
-
 function clearKeyboardHint() {
   keyboardEl.querySelectorAll('.key.hint').forEach(b => b.classList.remove('hint'));
 }
-
 function showPhonBubble(text) {
   const bubble = document.getElementById('phonBubble');
   if (!bubble) return;
@@ -3668,20 +2935,13 @@ function showPhonBubble(text) {
   clearTimeout(_phonTimer);
   _phonTimer = setTimeout(() => bubble.classList.remove('show'), 1800);
 }
-
 function openChallenge(enemy) {
   if (G.preparing) return;
-
   G.paused = true;
   G.pauseStartTime = performance.now();
-
   G.chests.forEach(c => { if(!c.opened) c.el.classList.add('paused'); });
 
-  C.enemy = enemy;
-  C.typed = '';
-  C.seg = '';
-  C.segFirst = false;
-  C.answered = false;
+  C.enemy = enemy; C.typed = ''; C.seg = ''; C.segFirst = false; C.answered = false;
 
   wordAvatar.className = 'word-avatar ' + enemy.type;
   avatarEmoji.textContent = EMOJI[enemy.type];
@@ -3689,18 +2949,14 @@ function openChallenge(enemy) {
 
   setFeedback('', '');
   clearTimeout(_fbTimer);
-
   updateItemButtons();
   clearKeyboardHint();
   showPhonBubble('');
-
   renderQuestion();
   renderKeyboard();
-
   sfxOpen();
   modalMask.classList.add('show');
 }
-
 function closeChallenge(noSound) {
   if (!C.enemy && !modalMask.classList.contains('show')) return;
   if (!noSound) sfxClose();
@@ -3709,7 +2965,6 @@ function closeChallenge(noSound) {
   showPhonBubble('');
   clearTimeout(_fbTimer);
   C.enemy = null;
-  
   if (G.paused) {
     const pauseDur = performance.now() - G.pauseStartTime;
     G.pauseOffset += pauseDur;
@@ -3717,12 +2972,10 @@ function closeChallenge(noSound) {
     G.chests.forEach(c => { if(!c.opened) c.el.classList.remove('paused'); });
   }
 }
-
 function renderQuestion() {
   const e = C.enemy;
   if (!e) return;
   const w = e.word;
-
   const html = makeBlank(w.en || '', w.w);
   qArea.innerHTML =
     '<div class="q-en" id="qEn">' + html + '</div>' +
@@ -3731,7 +2984,6 @@ function renderQuestion() {
   C.segFirst = _lastSegFirst;
   updateBlank();
 }
-
 function renderKeyboard() {
   const rows = ['abcdefg', 'hijklmn', 'opqrstu', 'vwxyz'];
   let html = '';
@@ -3744,12 +2996,8 @@ function renderKeyboard() {
   html += '<button class="key del" data-act="del">⌫</button>';
   html += '<button class="key confirm" data-act="ok">确认</button>';
   keyboardEl.innerHTML = html;
-
   keyboardEl.querySelectorAll('[data-key]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      if (C.answered) return;
-      pressChar(btn.dataset.key);
-    });
+    btn.addEventListener('click', () => { if (C.answered) return; pressChar(btn.dataset.key); });
   });
   keyboardEl.querySelector('[data-act="del"]').addEventListener('click', () => {
     if (C.answered) return;
@@ -3761,35 +3009,24 @@ function renderKeyboard() {
     submitAnswer();
   });
 }
-
 function pressChar(ch) {
   if (!C.enemy) return;
   const maxLen = C.enemy.word.w.length + 2;
   if (C.typed.length >= maxLen) return;
-
-  if (ch === ' ') {
-    C.typed += ' ';
-  } else if (!C.typed && C.segFirst) {
-    C.typed += ch.toUpperCase();
-  } else {
-    C.typed += ch.toLowerCase();
-  }
+  if (ch === ' ') { C.typed += ' '; }
+  else if (!C.typed && C.segFirst) { C.typed += ch.toUpperCase(); }
+  else { C.typed += ch.toLowerCase(); }
   updateBlank();
   sfxKey();
 }
-
 function updateBlank() {
   const b = document.getElementById('blankSpace');
   if (!b) return;
-  if (!C.typed) {
-    b.innerHTML = '<span class="caret"></span>';
-    return;
-  }
+  if (!C.typed) { b.innerHTML = '<span class="caret"></span>'; return; }
   const ok = isCorrect(C.typed, C.enemy.word.w, C.seg);
   b.innerHTML = escapeHtml(C.typed) + '<span class="caret"></span>';
   b.style.color = ok ? '#10b981' : '#e8edf5';
 }
-
 function useSpeaker() {
   if (!C.enemy) return;
   const s = loadStore();
@@ -3801,7 +3038,6 @@ function useSpeaker() {
   speakCurrent();
   showPhonBubble(C.enemy.word.p || '');
 }
-
 function useHighlight() {
   if (!C.enemy) return;
   const s = loadStore();
@@ -3810,20 +3046,14 @@ function useHighlight() {
     return;
   }
   if (!useItem('highlight')) return;
-
-  const letters = new Set(
-    (C.enemy.word.w || '').toLowerCase().replace(/[^a-z]/g, '').split('')
-  );
-
+  const letters = new Set((C.enemy.word.w || '').toLowerCase().replace(/[^a-z]/g, '').split(''));
   keyboardEl.querySelectorAll('[data-key]').forEach(btn => {
     const k = btn.dataset.key;
     if (letters.has(k)) btn.classList.add('hint');
   });
-
   beep(1300, .05, 'sine', .06);
   beep(1700, .08, 'sine', .05, .05);
 }
-
 function useFirstLetter() {
   if (!C.enemy) return;
   const s = loadStore();
@@ -3832,18 +3062,14 @@ function useFirstLetter() {
     return;
   }
   if (!useItem('firstLetter')) return;
-  
   const word = C.enemy.word.w;
   if (!word) return;
-  
   C.typed = word[0] || '';
   if (C.segFirst) C.typed = C.typed.toUpperCase();
-  
   updateBlank();
   sfxKey();
   beep(1200, .1, 'sine', .08);
 }
-
 let _speakAudio = null;
 function speakCurrent() {
   if (!C.enemy) return;
@@ -3873,15 +3099,12 @@ function handleWrongAnswer(e) {
       setFeedback('err',
         '✗ 上一题「' + escapeHtml(oldMeaning) + '」的正确答案：<b>' + escapeHtml(correctWord) + '</b><br>' +
         '<span style="font-size:12px;opacity:.85">这是最后一个生词，请牢记后再试！</span>');
-
       C.typed = '';
       updateBlank();
-      // 提示常驻，直到答对或关闭弹窗，避免弹窗高度突变
       clearTimeout(_fbTimer);
       _fbTimer = null;
       return;
     }
-
     const newWord = pickReplacementWordReview(correctWord);
     if (newWord) e.word = newWord;
   } else {
@@ -3894,12 +3117,9 @@ function handleWrongAnswer(e) {
     const tag = e.el.querySelector('.enemy-tag');
     if (tag) tag.textContent = e.word.m || e.word.cn || '';
   }
-
   wordMeaning.textContent = e.word.m || '';
 
-  C.typed = '';
-  C.seg = '';
-  C.segFirst = false;
+  C.typed = ''; C.seg = ''; C.segFirst = false;
   clearKeyboardHint();
   showPhonBubble('');
   renderQuestion();
@@ -3913,12 +3133,9 @@ function handleWrongAnswer(e) {
   setFeedback('err',
     '✗ 上一题「' + escapeHtml(oldMeaning) + '」的正确答案：<b>' + escapeHtml(correctWord) + '</b><br>' +
     '<span style="font-size:12px;opacity:.85">' +
-    (isReview
-      ? '该词保留在复习仓，再试一次'
-      : '该词已加入复习仓，已换新单词') +
+    (isReview ? '该词保留在复习仓，再试一次' : '该词已加入复习仓，已换新单词') +
     '</span>');
 
-  // 提示常驻，直到答对或关闭弹窗
   clearTimeout(_fbTimer);
   _fbTimer = null;
 }
@@ -3926,17 +3143,14 @@ function handleWrongAnswer(e) {
 function submitAnswer() {
   const e = C.enemy;
   if (!e || !e.alive) return;
-
   clearTimeout(_fbTimer);
-
   const ok = isCorrect(C.typed, e.word.w, C.seg);
   G.answerCount++;
 
   if (ok) {
     G.correctCount++;
     C.answered = true;
-    sfxGood();
-    sfxBreak();
+    sfxGood(); sfxBreak();
 
     if (e.isElite || e === G.bloatingEnemy) {
       showToast('🏆', '成功拆除能量源！', '获得海量奖励！', '#fbbf24');
@@ -3958,9 +3172,7 @@ function submitAnswer() {
     const color = e.type === 'blue' ? '#38bdf8' : e.type === 'orange' ? '#fb923c' : '#f87171';
     spawnParticles(e.x, e.y, color, 14);
 
-    if (G.isReview) {
-      removeFromReview(e.tier, e.word.w);
-    }
+    if (G.isReview) removeFromReview(e.tier, e.word.w);
     markMastered(e.tier, e.word.w.toLowerCase());
 
     G.streak = (G.streak || 0) + 1;
@@ -3970,7 +3182,6 @@ function submitAnswer() {
       G.streak = 0;
       updateStreakBar();
       G.enemies.forEach(en => { if(en.el) en.el.classList.remove('streak-warning'); });
-
       setTimeout(() => {
         if (G.chests.length === 0) {
           spawnChest();
@@ -3983,9 +3194,7 @@ function submitAnswer() {
     } else if (G.streak === 4) {
       showToast('⚡', '连击预警！', '再答对 1 个即可获得宝箱！', '#fbbf24');
       sfxStreakWarn();
-      G.enemies.forEach(en => {
-        if (en.alive && en.el) en.el.classList.add('streak-warning');
-      });
+      G.enemies.forEach(en => { if (en.alive && en.el) en.el.classList.add('streak-warning'); });
     }
 
     addKillCount();
@@ -3996,22 +3205,18 @@ function submitAnswer() {
     healPlayer(healAmt);
     setTimeout(() => spawnParticles(e.x, e.y, '#4ade80', 8), 120);
 
-    if (e.mystery) {
-      setTimeout(() => triggerMystery(e), 220);
-    }
+    if (e.mystery) setTimeout(() => triggerMystery(e), 220);
 
     setFeedback('ok',
       '✓ 正确！敌人已击破　<span style="color:#4ade80;font-weight:800">+' + healAmt + ' HP</span>' +
       (e.mystery ? '　<span style="color:#fbbf24;font-weight:800">✦ 神秘掉落</span>' : ''));
 
     setTimeout(() => {
-      // 安全锁：防并发误关新弹窗
       if (C.enemy === e) {
         closeChallenge(true);
         checkLevelClear();
       }
     }, 520);
-
   } else {
     sfxBad();
     handleWrongAnswer(e);
@@ -4019,16 +3224,14 @@ function submitAnswer() {
 }
 
 /* =========================================================
-   13. Ready / Go
+   12. Ready / Go
    ========================================================= */
 function showReadyGo(cb) {
   const overlay = document.getElementById('readyOverlay');
   if (!overlay) { if (typeof cb === 'function') cb(); return; }
-
   overlay.classList.add('show');
   overlay.innerHTML = '<div class="ready-word">Ready?</div>';
   sfxReady();
-
   setTimeout(() => {
     overlay.innerHTML = '<div class="ready-word go">Go!</div>';
     sfxGo();
@@ -4041,7 +3244,7 @@ function showReadyGo(cb) {
 }
 
 /* =========================================================
-   14. 关卡管理
+   13. 关卡管理
    ========================================================= */
 function startLevel(levelNum, isReview) {
   G.isReview = !!isReview;
@@ -4061,23 +3264,22 @@ function startLevel(levelNum, isReview) {
   G.correctCount = 0;
   G.shieldUntil = 0;
   G.slowUntil = 0;
-  
   G.chests = [];
   G.chestActive = false;
   G.bloatingEnemy = null;
   G.bloatTime = 0;
   G.pauseOffset = 0;
-  
   _lastBuffKey = '';
+  _lastShieldSec = -1;
 
   G.startTime = performance.now();
   G.elapsed = 0;
   _lastTimerSec = -1;
   const tEl = document.getElementById('timerBadge');
   if (tEl) tEl.textContent = '用时0秒';
-  
+
   updateStreakBar();
-  updateHUD(); // 重置血条文字
+  updateHUD();
 
   const playerEl = document.getElementById('player');
   if (playerEl) playerEl.classList.remove('shielded');
@@ -4086,11 +3288,9 @@ function startLevel(levelNum, isReview) {
   hideRules();
 
   let enemies;
-
   if (G.isReview) {
     const items = getReviewItems();
     G.reviewTotalLevels = Math.max(1, Math.ceil(items.length / TOTAL_PER_LEVEL));
-
     if (!items.length) {
       G.isReview = false;
       G.running = false;
@@ -4099,7 +3299,6 @@ function startLevel(levelNum, isReview) {
       setTimeout(() => startLevel(STORE.level || 1, false), 600);
       return;
     }
-
     enemies = buildReviewLevel(levelNum, items);
   } else {
     enemies = buildLevel(levelNum);
@@ -4141,13 +3340,15 @@ function startLevel(levelNum, isReview) {
   p.style.left = PLAYER_X + '%';
   p.style.bottom = PLAYER_Y + '%';
 
+  setTimeout(updateArenaSize, 0);
+
   showReadyGo(() => {
     G.paused = false;
     G.preparing = false;
     G.startTime = performance.now();
     G.elapsed = 0;
     _lastTimerSec = -1;
-
+    updateArenaSize();
     G.rulePhase = true;
     showRules();
   });
@@ -4157,29 +3358,17 @@ function updateRankHUD() {
   const total = STORE.totalKills || 0;
   const r = getRank(total);
   const key = r.sun + '|' + r.moon + '|' + r.star + '|' + _userName;
-
   const box = document.getElementById('rankBadge');
   if (!box) return;
-
   if (key === _lastRankKey) return;
   _lastRankKey = key;
-
   const userNameHtml =
     '<span class="user-name" title="' + escapeHtml(_userName) + '">' +
-    escapeHtml(_userName) +
-    '</span>';
-
+    escapeHtml(_userName) + '</span>';
   let html = userNameHtml;
-
-  if (r.sun > 0) {
-    html += '<span class="rank-item sun"><i>☀️</i><span class="rank-num">' + r.sun + '</span></span>';
-  }
-  if (r.moon > 0) {
-    html += '<span class="rank-item moon"><i>🌙</i><span class="rank-num">' + r.moon + '</span></span>';
-  }
-  if (r.star > 0 || html === userNameHtml) {
-    html += '<span class="rank-item star"><i>⭐</i><span class="rank-num">' + r.star + '</span></span>';
-  }
+  if (r.sun > 0) html += '<span class="rank-item sun"><i>☀️</i><span class="rank-num">' + r.sun + '</span></span>';
+  if (r.moon > 0) html += '<span class="rank-item moon"><i>🌙</i><span class="rank-num">' + r.moon + '</span></span>';
+  if (r.star > 0 || html === userNameHtml) html += '<span class="rank-item star"><i>⭐</i><span class="rank-num">' + r.star + '</span></span>';
   box.innerHTML = html;
 }
 
@@ -4196,7 +3385,6 @@ function checkLevelClear() {
     setTimeout(() => showResult(true), 850);
   }
 }
-
 function gameOver() {
   if (G.over) return;
   G.over = true;
@@ -4218,14 +3406,12 @@ function countUp(el, to, dur, suffix) {
   }
   requestAnimationFrame(tick);
 }
-
 function calcStars(win, acc, hp) {
   if (!win) return 0;
   if (acc >= 90 && hp >= 60) return 3;
   if (acc >= 70 || hp >= 30) return 2;
   return 1;
 }
-
 function showResult(win) {
   const mask = document.getElementById('resultMask');
   const card = document.getElementById('resultCard');
@@ -4238,7 +3424,6 @@ function showResult(win) {
 
   const acc = G.answerCount > 0 ? Math.round(G.correctCount / G.answerCount * 100) : 0;
   const hp = Math.round(G.hp);
-
   card.classList.toggle('lose', !win);
 
   const starCount = calcStars(win, acc, hp);
@@ -4252,7 +3437,6 @@ function showResult(win) {
   if (win) {
     if (G.isReview) {
       const remaining = getReviewItems();
-
       if (remaining.length > 0) {
         icon.textContent = '📚';
         badge.textContent = '复习通关';
@@ -4266,21 +3450,13 @@ function showResult(win) {
           startLevel(nextLv, true);
         };
         subBtn.textContent = '返回闯关';
-        subBtn.onclick = () => {
-          sfxClick();
-          G.isReview = false;
-          startLevel(STORE.level || 1, false);
-        };
+        subBtn.onclick = () => { sfxClick(); G.isReview = false; startLevel(STORE.level || 1, false); };
       } else {
         icon.textContent = '🎉';
         badge.textContent = '全部掌握';
         title.textContent = '复习仓已清空！';
         mainBtn.textContent = '返回闯关';
-        mainBtn.onclick = () => {
-          sfxClick();
-          G.isReview = false;
-          startLevel(STORE.level || 1, false);
-        };
+        mainBtn.onclick = () => { sfxClick(); G.isReview = false; startLevel(STORE.level || 1, false); };
         subBtn.textContent = '重玩本关';
         subBtn.onclick = () => { sfxClick(); startLevel(G.reviewLevel, true); };
       }
@@ -4308,134 +3484,86 @@ function showResult(win) {
     subBtn.textContent = G.isReview ? '返回闯关' : '返回第 1 关';
     subBtn.onclick = () => {
       sfxClick();
-      if (G.isReview) {
-        G.isReview = false;
-        startLevel(STORE.level || 1, false);
-      } else {
-        startLevel(1, false);
-      }
+      if (G.isReview) { G.isReview = false; startLevel(STORE.level || 1, false); }
+      else startLevel(1, false);
     };
   }
 
   document.getElementById('rsKill').textContent = '0';
   document.getElementById('rsAcc').textContent = '0%';
   document.getElementById('rsHp').textContent = '0';
-
   mask.classList.add('show');
-
   if (win) sfxWinFanfare(); else sfxLose();
-
   setTimeout(() => {
     countUp(document.getElementById('rsKill'), G.killCount, 600);
     countUp(document.getElementById('rsAcc'), acc, 700, '%');
     countUp(document.getElementById('rsHp'), hp, 800);
   }, 480);
-
   if (win && starCount > 0) {
-    for (let i = 0; i < starCount; i++) {
-      setTimeout(sfxStar, 480 + i * 130);
-    }
+    for (let i = 0; i < starCount; i++) setTimeout(sfxStar, 480 + i * 130);
   }
 }
 
 /* =========================================================
-   15. 入口
+   14. 入口
    ========================================================= */
 function startGame() {
-  ac();
-  sfxClick();
+  ac(); sfxClick();
   document.getElementById('splashMask').classList.add('hide');
   startLevel(STORE.level || 1, false);
 }
-
 function startReview() {
   if (!localStorage.getItem('dd_auth')) { location.href = 'login.html'; return; }
-
-  ac();
-  sfxClick();
-
+  ac(); sfxClick();
   const items = getReviewItems();
   if (!items.length) {
     showToast('📚', '复习仓为空', '继续闯关积累错词吧', '#a78bfa');
     return;
   }
-
   document.getElementById('splashMask').classList.add('hide');
   startLevel(1, true);
 }
-
 function backHome() {
   sfxClick();
-
-  G.running = false;
-  G.paused = true;
-  G.preparing = false;
-  G.rulePhase = false;
-  G.over = true;
-  G.chestActive = false;
-  G.nextChestTime = 0;
-  G.bloatingEnemy = null;
-
+  G.running = false; G.paused = true; G.preparing = false;
+  G.rulePhase = false; G.over = true;
+  G.chestActive = false; G.nextChestTime = 0; G.bloatingEnemy = null;
   hideRules();
-
-  if (modalMask.classList.contains('show')) {
-    modalMask.classList.remove('show');
-  }
-  if (C.enemy) {
-    clearKeyboardHint();
-    showPhonBubble('');
-    C.enemy = null;
-  }
-
+  if (modalMask.classList.contains('show')) modalMask.classList.remove('show');
+  if (C.enemy) { clearKeyboardHint(); showPhonBubble(''); C.enemy = null; }
   document.getElementById('resultMask').classList.remove('show');
-
   clearEntities();
   document.getElementById('readyOverlay').classList.remove('show');
   document.getElementById('readyOverlay').innerHTML = '';
-
   document.getElementById('splashMask').classList.remove('hide');
 }
 
 /* =========================================================
-   16. 自绘弹窗控制器 (替代 alert / confirm)
+   15. 自绘弹窗
    ========================================================= */
 function showAppModal({ title, content, showCancel = true, onConfirm, onCancel }) {
   const mask = document.getElementById('appModalMask');
   document.getElementById('appModalTitle').textContent = title;
   document.getElementById('appModalContent').innerHTML = content;
-  
   const actions = document.getElementById('appModalActions');
   actions.innerHTML = '';
-  
   if (showCancel) {
     const btnCancel = document.createElement('button');
     btnCancel.className = 'app-modal-btn app-modal-btn-cancel';
     btnCancel.textContent = '取消';
-    btnCancel.onclick = () => {
-      mask.classList.remove('show');
-      if (onCancel) onCancel();
-    };
+    btnCancel.onclick = () => { mask.classList.remove('show'); if (onCancel) onCancel(); };
     actions.appendChild(btnCancel);
   }
-  
   const btnConfirm = document.createElement('button');
   btnConfirm.className = 'app-modal-btn app-modal-btn-confirm';
   btnConfirm.textContent = '确定';
-  btnConfirm.onclick = () => {
-    mask.classList.remove('show');
-    if (onConfirm) onConfirm();
-  };
+  btnConfirm.onclick = () => { mask.classList.remove('show'); if (onConfirm) onConfirm(); };
   actions.appendChild(btnConfirm);
-
   mask.classList.add('show');
 }
-
 document.getElementById('appModalMask').addEventListener('click', function(e) {
-  if (e.target === this) {
-    this.classList.remove('show');
-  }
+  if (e.target === this) this.classList.remove('show');
 });
-
 function resetProgress() {
   sfxClick();
   showAppModal({
@@ -4453,7 +3581,6 @@ function resetProgress() {
     }
   });
 }
-
 function logout() {
   sfxClick();
   showAppModal({
@@ -4469,12 +3596,11 @@ function logout() {
 }
 
 /* =========================================================
-   17. 键盘与初始化
+   16. 键盘与初始化
    ========================================================= */
 document.addEventListener('keydown', ev => {
   if (!modalMask.classList.contains('show')) return;
   if (C.answered) return;
-
   if (ev.key === 'Backspace') {
     ev.preventDefault();
     C.typed = C.typed.slice(0, -1);
@@ -4489,7 +3615,6 @@ document.addEventListener('keydown', ev => {
     pressChar(ev.key);
   }
 });
-
 document.addEventListener('click', function once() {
   ac();
   document.removeEventListener('click', once);
