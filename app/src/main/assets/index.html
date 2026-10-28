@@ -346,7 +346,6 @@ body {
 }
 
 /* ================= 玩家 ================= */
-/* 容器只负责定位，不再承担 filter / animation，避免连累血量条 */
 .player {
   position: absolute;
   left: 50%; bottom: 10%;
@@ -360,13 +359,14 @@ body {
   align-items: center;
 }
 
-/* 头像主体：🧑 + 🚀 显式拼接，任何设备都稳定 */
+/* 头像主体 */
 .player-emoji {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(46px, 12vw, 68px);
+  width: clamp(46px, 12vw, 68px);
+  height: clamp(46px, 12vw, 68px);
   line-height: 1;
   filter: drop-shadow(0 0 16px rgba(56,189,248,.6));
   animation: playerIdle 1.8s ease-in-out infinite;
@@ -374,25 +374,18 @@ body {
 }
 @keyframes playerIdle {
   0%,100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-6px) scale(1.04); }
+  50%     { transform: translateY(-6px) scale(1.04); }
 }
-.pe-main {
-  display: block;
-  line-height: 1;
-}
-.pe-badge {
-  position: absolute;
-  right: -0.32em;
-  bottom: -0.06em;
-  font-size: 0.42em;
-  line-height: 1;
-  transform: rotate(-35deg);
-  filter: drop-shadow(0 0 6px rgba(251,191,36,.85));
-  animation: jetFlame 1.3s ease-in-out infinite;
-}
-@keyframes jetFlame {
-  0%,100% { opacity: .72; transform: rotate(-35deg) scale(1); }
-  50%     { opacity: 1;   transform: rotate(-35deg) scale(1.15); }
+
+/* 游戏内图片头像样式 */
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2.5px solid rgba(56,189,248,.9);
+  box-shadow: 0 0 20px rgba(56,189,248,.7), inset 0 0 10px rgba(0,0,0,.3);
+  background: #1e293b;
 }
 
 .shield-aura {
@@ -545,7 +538,6 @@ body {
   transition: transform 120s linear;
 }
 
-/* 精英怪红环（仅 opacity 脉冲，可合成） */
 .enemy.bloating .enemy-orb::before {
   content: '';
   position: absolute;
@@ -560,7 +552,6 @@ body {
   50%     { opacity: 1;  transform: scale(1.1); }
 }
 
-/* 连击警告金环（仅 opacity 脉冲） */
 .enemy.streak-warning .enemy-orb::after {
   content: '';
   position: absolute;
@@ -588,7 +579,6 @@ body {
   50% { transform: translateY(-8px); }
 }
 
-/* 金圈敌人虚线环（仅 opacity 脉冲） */
 .enemy.mystery::after {
   content: '';
   position: absolute;
@@ -634,7 +624,6 @@ body {
   box-shadow: 0 1px 4px rgba(0,0,0,.45);
 }
 
-/* 敌人球体：静态 box-shadow，不再做重绘型呼吸 */
 .enemy.blue .enemy-orb {
   background: radial-gradient(circle at 34% 30%, #7dd3fc, #0ea5e9 55%, #075985);
   box-shadow: 0 0 22px rgba(56,189,248,.85), inset 0 -5px 10px rgba(0,0,0,.35);
@@ -654,7 +643,6 @@ body {
   animation: floatY 1.6s ease-in-out infinite var(--d1, 0s);
 }
 
-/* 红色敌人瞄准中：只做亮度提升，不做 box-shadow 动画 */
 .enemy.red.aiming .enemy-orb {
   filter: brightness(1.4);
 }
@@ -1471,64 +1459,262 @@ body {
 .btn-ghost:active { transform: scale(.985); }
 
 /* =========================================================
-   开场画面
+   开场画面（含选角系统）
    ========================================================= */
 .splash-mask {
   position: fixed; inset: 0; z-index: 700;
   background: radial-gradient(circle at 50% 30%, #1e1b4b 0%, #0b1220 70%);
   display: flex; align-items: center; justify-content: center;
-  padding: 24px;
+  padding: 16px;
 }
 .splash-mask.hide { display: none; }
-.splash-card { text-align: center; max-width: 380px; width: 100%; }
+.splash-card { 
+  text-align: center; 
+  max-width: 420px; 
+  width: 100%; 
+  max-height: 96vh; 
+  overflow-y: auto;
+  scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 0;
+}
+.splash-card::-webkit-scrollbar { display: none; }
+
 .splash-title {
-  font-size: 36px; font-weight: 900; letter-spacing: 4px;
+  font-size: 34px; font-weight: 900; letter-spacing: 4px;
   background: linear-gradient(90deg, #38bdf8, #a78bfa, #f472b6, #38bdf8);
   background-size: 300% 100%;
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: flowText 5s linear infinite;
-  margin-bottom: 10px;
+  margin-bottom: 4px;
 }
 @keyframes flowText {
   0% { background-position: 0% 50%; }
   100% { background-position: 300% 50%; }
 }
-.splash-sub { font-size: 15px; color: var(--txt-mute); margin-bottom: 30px; letter-spacing: .8px; }
+.splash-sub { font-size: 13px; color: var(--txt-mute); margin-bottom: 16px; letter-spacing: .8px; }
 
-.enemy-legend { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+/* ---- 选角区域 ---- */
+.char-select-section {
+  margin-bottom: 20px;
+  padding: 20px 0 1px;
+  background: radial-gradient(ellipse at center bottom, rgba(56,189,248,0.15) 0%, transparent 60%), rgba(15,23,42,0.6);
+  border: 1px solid rgba(56,189,248,0.2);
+  border-radius: 16px;
+  box-shadow: inset 0 0 20px rgba(0,0,0,.5);
+  position: relative;
+  overflow: hidden;
+}
+.char-select-section::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: 
+    linear-gradient(rgba(56,189,248,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56,189,248,0.05) 1px, transparent 1px);
+  background-size: 15px 15px;
+  pointer-events: none;
+}
+.char-select-section::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, #38bdf8, transparent);
+  box-shadow: 0 0 20px #38bdf8;
+  animation: scanLine 3s ease-in-out infinite;
+}
+@keyframes scanLine {
+  0%, 100% { transform: translateY(-100px); opacity: 0; }
+  50% { transform: translateY(-20px); opacity: 1; }
+}
+
+.char-section-title {
+  font-size: 13px;
+  font-weight: 900;
+  color: #7dd3fc;
+  letter-spacing: 2px;
+  margin-bottom: 8px; /* 减小下边距，让空间留给轮播 */
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  z-index: 2;
+}
+.char-section-title::before,
+.char-section-title::after {
+  content: '';
+  width: 30px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(56,189,248,.6));
+}
+.char-section-title::after {
+  background: linear-gradient(90deg, rgba(56,189,248,.6), transparent);
+}
+
+.char-track-wrap {
+  position: relative;
+  width: 100%;
+  height: 130px; /* 原 100px，增高以容纳放大的头像和皇冠 */
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+  z-index: 2;
+}
+.char-track {
+  position: absolute;
+  left: 50%;
+  top: 65%;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transform: translate(0, -50%);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+.char-track.dragging {
+  transition: none;
+}
+
+.char-item {
+  flex: 0 0 auto;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 2px solid rgba(56,189,248,0.3); /* 未选中带点淡蓝边框 */
+  background: #1e293b;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  opacity: 0.6;
+  transform: scale(0.8);
+  filter: grayscale(0.2) brightness(0.85); /* 去掉全灰，保留一点质感 */
+  animation: idleFloat 3s ease-in-out infinite;
+}
+/* 未选中错峰浮动 */
+.char-item:nth-child(1) { animation-delay: 0s; }
+.char-item:nth-child(2) { animation-delay: 0.4s; }
+.char-item:nth-child(3) { animation-delay: 0.8s; }
+.char-item:nth-child(4) { animation-delay: 1.2s; }
+.char-item:nth-child(5) { animation-delay: 1.6s; }
+.char-item:nth-child(6) { animation-delay: 2.0s; }
+.char-item:nth-child(7) { animation-delay: 2.4s; }
+
+@keyframes idleFloat {
+  0%, 100% { transform: scale(0.8) translateY(0); }
+  50% { transform: scale(0.8) translateY(-5px); }
+}
+
+.char-item img {
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+}
+
+/* 选中状态：科技蓝光 */
+.char-item.active {
+  opacity: 1;
+  animation: activeFloat 2s ease-in-out infinite;
+  filter: grayscale(0) brightness(1.1);
+  border-color: #38bdf8;
+  box-shadow: 
+    0 0 20px rgba(56,189,248,0.8), 
+    0 0 40px rgba(56,189,248,0.4),
+    inset 0 0 15px rgba(56,189,248,0.6);
+  z-index: 10;
+}
+
+@keyframes activeFloat {
+  0%, 100% { 
+    transform: scale(1.35) translateY(-5px); 
+    box-shadow: 0 0 15px rgba(56,189,248,0.6), 0 0 35px rgba(56,189,248,0.3); 
+  }
+  50% { 
+    transform: scale(1.35) translateY(-8px); 
+    box-shadow: 0 0 25px rgba(56,189,248,1), 0 0 55px rgba(56,189,248,0.6); 
+  }
+}
+
+/* 选中特效：底部蓝光脉冲 */
+.char-item.active::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(56,189,248,0.5) 0%, transparent 70%);
+  animation: bluePulse 1.5s ease-in-out infinite alternate;
+  z-index: -1;
+  pointer-events: none;
+}
+@keyframes bluePulse {
+  0% { transform: scale(0.9); opacity: 0.5; }
+  100% { transform: scale(1.2); opacity: 1; }
+}
+
+/* 选中图片的科技呼吸 */
+.char-item.active img {
+  animation: techScan 2s linear infinite;
+}
+@keyframes techScan {
+  0%, 100% { filter: brightness(1) contrast(1) saturate(1); }
+  50% { filter: brightness(1.2) contrast(1.1) saturate(1.2); }
+}
+
+/* 选中皇冠 */
+.char-item.active::after {
+  content: '👑';
+  position: absolute;
+  top: -26px;
+  left: 50%;
+  transform: translateX(-50%) scale(1);
+  font-size: 20px;
+  filter: drop-shadow(0 0 8px rgba(251,191,36,0.8));
+  animation: floatCrown 2s ease-in-out infinite;
+  z-index: 11;
+}
+
+@keyframes floatCrown {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-4px); }
+}
+
+/* ---- 其他内容 ---- */
+.enemy-legend { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
 .legend-item {
-  display: flex; align-items: center; gap: 14px;
+  display: flex; align-items: center; gap: 10px;
   background: rgba(30,41,59,.6);
   border: 1px solid rgba(148,163,184,.14);
-  border-radius: 14px;
-  padding: 12px 16px;
+  border-radius: 10px;
+  padding: 8px 12px;
   text-align: left;
-  transition: border-color .2s, background .2s;
 }
 .legend-orb {
-  width: 40px; height: 40px;
+  width: 32px; height: 32px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 20px; flex: 0 0 auto; position: relative;
+  font-size: 16px; flex: 0 0 auto; position: relative;
 }
 .legend-orb.blue   { background: radial-gradient(circle at 34% 30%, #7dd3fc, #0ea5e9 55%, #075985); box-shadow: 0 0 12px rgba(56,189,248,.7); }
 .legend-orb.orange { background: radial-gradient(circle at 34% 30%, #fdba74, #f97316 55%, #9a3412); box-shadow: 0 0 12px rgba(249,115,22,.7); }
 .legend-orb.red    { background: radial-gradient(circle at 34% 30%, #fca5a5, #ef4444 55%, #7f1d1d); box-shadow: 0 0 12px rgba(239,68,68,.7); }
-.legend-text b { display: block; font-size: 16px; color: var(--txt); margin-bottom: 4px; font-weight: 800; }
-.legend-text span { font-size: 14px; color: var(--txt-mute); }
+.legend-text b { display: block; font-size: 14px; color: var(--txt); margin-bottom: 2px; font-weight: 800; }
+.legend-text span { font-size: 12px; color: var(--txt-mute); }
 
 .splash-tip {
-  display: flex; align-items: center; gap: 14px;
+  display: flex; align-items: center; gap: 10px;
   background: rgba(251,191,36,.07);
   border: 1px solid rgba(251,191,36,.26);
-  border-radius: 14px;
-  padding: 12px 16px;
-  margin-bottom: 24px;
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 16px;
   text-align: left;
 }
 .splash-tip-ring {
-  width: 32px; height: 32px;
+  width: 24px; height: 24px;
   border-radius: 50%;
   border: 2px dashed rgba(251,191,36,.85);
   flex: 0 0 auto;
@@ -1538,15 +1724,15 @@ body {
   0%,100% { opacity: .62; transform: scale(.95); }
   50%     { opacity: 1;  transform: scale(1.08); }
 }
-.splash-tip span { font-size: 14px; color: rgba(251,191,36,.88); line-height: 1.5; }
+.splash-tip span { font-size: 12px; color: rgba(251,191,36,.88); line-height: 1.4; }
 
 .splash-start {
   position: relative;
   width: 100%;
-  padding: 16px; border-radius: 16px;
+  padding: 14px; border-radius: 16px;
   background: linear-gradient(180deg, #f59e0b 0%, #d97706 55%, #b45309 100%);
   color: #fff;
-  font-size: 20px; font-weight: 900; letter-spacing: 2px;
+  font-size: 18px; font-weight: 900; letter-spacing: 2px;
   cursor: pointer; overflow: hidden;
   font-family: inherit;
   border: 1px solid rgba(255,224,140,.35);
@@ -1556,6 +1742,10 @@ body {
     0 2px 0 rgba(146,64,14,.9),
     0 8px 26px rgba(245,158,11,.36);
   transition: transform .12s, box-shadow .12s, filter .12s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 .splash-start:hover { filter: brightness(1.06); }
 .splash-start:active {
@@ -1565,11 +1755,36 @@ body {
     inset 0 2px 8px rgba(120,53,15,.4),
     0 1px 0 rgba(146,64,14,.9);
 }
+.splash-learn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(56,189,248,.32);
+  background: rgba(56,189,248,.08);
+  color: #7dd3fc;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: .5px;
+  transition: background .18s, border-color .18s, color .18s, transform .12s;
+}
+.splash-learn:hover {
+  background: rgba(56,189,248,.16);
+  border-color: rgba(56,189,248,.55);
+  color: #bae6fd;
+}
+.splash-learn:active { transform: scale(.98); }
 .splash-reset {
-  margin-top: 16px;
+  margin-top: 12px;
   background: none; border: none;
   color: #475569;
-  font-size: 14px; cursor: pointer;
+  font-size: 13px; cursor: pointer;
   text-decoration: underline; text-underline-offset: 3px;
   font-family: inherit;
   transition: color .2s;
@@ -1577,17 +1792,17 @@ body {
 .splash-reset:hover { color: var(--txt-dim); }
 
 .splash-logout {
-  display: inline-flex; align-items: center; gap: 5px;
-  margin-top: 12px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  margin-top: 10px;
   background: none; border: none;
   color: #64748b;
-  font-size: 14px; cursor: pointer;
+  font-size: 13px; cursor: pointer;
   font-family: inherit; letter-spacing: .3px;
   transition: color .2s, transform .2s;
 }
-.splash-logout span { font-size: 13px; opacity: .75; }
 .splash-logout:hover { color: #f87171; }
 .splash-logout:active { transform: scale(.96); }
+
 </style>
 </head>
 <body>
@@ -1624,10 +1839,12 @@ body {
   <div class="player" id="player">
     <div class="shield-aura"></div>
     <span class="shield-timer" id="shieldTimer">30s</span>
+    
+    <!-- 游戏内头像，JS 会动态更新 src -->
     <span class="player-emoji" id="playerAvatar">
-      <span class="pe-main">🧑</span>
-      <span class="pe-badge">🚀</span>
+      <img src="001.png" class="avatar-img" id="mainAvatarImg" alt="玩家" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjUwIiB5PSI1NSIgZm9udC1zaXplPSI0MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2ZmZiI+8J+RqTwvdGV4dD48L3N2Zz4='">
     </span>
+
     <div class="item-bag" id="itemBag"></div>
     <div class="player-status">
       <span class="timer-badge" id="timerBadge">用时0秒</span>
@@ -1688,6 +1905,16 @@ body {
   <div class="splash-card">
     <div class="splash-title">单词夺宝</div>
     <div class="splash-sub">多多好学出品 @2026 版权所有</div>
+    
+    <!-- ======= 选角区域 ======= -->
+    <div class="char-select-section">
+      <div class="char-section-title">选择角色</div>
+      <div class="char-track-wrap">
+        <div class="char-track" id="charTrack"></div>
+      </div>
+    </div>
+    <!-- ======================== -->
+
     <div class="enemy-legend">
       <div class="legend-item">
         <div class="legend-orb blue">👾</div>
@@ -1706,11 +1933,13 @@ body {
       <div class="splash-tip-ring"></div>
       <span>金圈敌人藏惊喜，连续答对 5 题会掉落宝箱，战场也会随机掉落宝箱。</span>
     </div>
-    <button class="splash-start" onclick="startGame()">开始闯关</button>
-    <button class="splash-reset" onclick="resetProgress()">重置进度</button>
-    <button class="splash-logout" onclick="logout()">
-      <span>⏻</span> 退出登录
+    
+    <button class="splash-start" onclick="startGame()">
+      <span>开始闯关</span>
     </button>
+    <button class="splash-learn" onclick="goLearn()">去学单词</button>
+    <button class="splash-reset" onclick="resetProgress()">重置进度</button>
+    <button class="splash-logout" onclick="logout()">退出登录</button>
   </div>
 </div>
 
@@ -1738,6 +1967,149 @@ body {
 
 <script src="gradewords.js?v=20261001"></script>
 <script>
+/* =========================================================
+   0. 角色选择逻辑（极致顺滑滑动拖拽 + 动效）
+   ========================================================= */
+const CHAR_LIST = ['001.png', '002.png', '003.png', '004.png', '005.png', '006.png', '007.png'];
+let currentAvatar = localStorage.getItem('dd_avatar') || '001.png';
+
+(function initCharSelect() {
+  const track = document.getElementById('charTrack');
+  const wrap = track.parentElement;
+  const mainImg = document.getElementById('mainAvatarImg');
+  
+  let currentIndex = CHAR_LIST.indexOf(currentAvatar);
+  if (currentIndex === -1) currentIndex = 0;
+  
+  // 1. 渲染列表
+  CHAR_LIST.forEach((imgName, index) => {
+    const div = document.createElement('div');
+    div.className = 'char-item';
+    const img = document.createElement('img');
+    img.src = imgName;
+    img.onerror = function() { this.src = 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iIzQ3NTU2OSIvPjx0ZXh0IHg9IjUwIiB5PSI2NSIgZm9udC1zaXplPSI1MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2ZmZiI+77yfPC90ZXh0Pjwvc3ZnPg=='; };
+    div.appendChild(img);
+    
+    // 点击选中
+    div.addEventListener('click', () => {
+      if (Math.abs(startX - endX) > 10) return; // 如果发生滑动，忽略点击
+      selectChar(index);
+    });
+    
+    track.appendChild(div);
+  });
+  
+  const items = Array.from(track.children);
+  
+  // 2. 计算居中位置
+  function getCenterOffset(index) {
+    const itemWidth = 64;
+    const gap = 20;
+    const itemSpace = itemWidth + gap;
+    return -(index * itemSpace + itemWidth / 2);
+  }
+  
+  // 3. 选中逻辑
+  function selectChar(index, animate = true) {
+    currentIndex = index;
+    currentAvatar = CHAR_LIST[index];
+    localStorage.setItem('dd_avatar', currentAvatar);
+    
+    if (mainImg) mainImg.src = currentAvatar;
+    
+    items.forEach((item, i) => {
+      if (i === index) item.classList.add('active');
+      else item.classList.remove('active');
+    });
+    
+    if (animate) track.style.transition = 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)';
+    else track.style.transition = 'none';
+    
+    track.style.transform = `translate(${getCenterOffset(index)}px, -50%)`;
+    
+    if (typeof sfxClick === 'function') sfxClick();
+  }
+  
+  // 初始化选中状态（关闭动画瞬间定位）
+  setTimeout(() => selectChar(currentIndex, false), 50);
+  
+  // 4. 手势拖拽滑动
+  let isDragging = false;
+  let startX = 0, startY = 0;
+  let endX = 0;
+  let currentTranslate = 0;
+  let prevTranslate = 0;
+  
+  track.addEventListener('touchstart', touchStart, {passive: true});
+  track.addEventListener('touchmove', touchMove, {passive: false});
+  track.addEventListener('touchend', touchEnd);
+  
+  track.addEventListener('mousedown', touchStart);
+  window.addEventListener('mousemove', touchMove);
+  window.addEventListener('mouseup', touchEnd);
+  
+  function touchStart(e) {
+    if (e.type === 'mousedown' && e.button !== 0) return;
+    startX = getPositionX(e);
+    startY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+    endX = startX; 
+    
+    const style = window.getComputedStyle(track);
+    const matrix = new DOMMatrixReadOnly(style.transform);
+    prevTranslate = matrix.m41;
+    
+    isDragging = true;
+    track.classList.add('dragging');
+  }
+  
+  function touchMove(e) {
+    if (!isDragging) return;
+    const currentX = getPositionX(e);
+    const currentY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+    
+    const diffX = currentX - startX;
+    const diffY = currentY - startY;
+    
+    if (e.type === 'touchmove' && Math.abs(diffX) > Math.abs(diffY)) {
+      e.preventDefault(); 
+    }
+    
+    currentTranslate = prevTranslate + diffX;
+    
+    // 边缘阻尼
+    const minOffset = getCenterOffset(CHAR_LIST.length - 1);
+    const maxOffset = getCenterOffset(0);
+    
+    if (currentTranslate > maxOffset) {
+      currentTranslate = maxOffset + (currentTranslate - maxOffset) * 0.3;
+    } else if (currentTranslate < minOffset) {
+      currentTranslate = minOffset + (currentTranslate - minOffset) * 0.3;
+    }
+    
+    track.style.transform = `translate(${currentTranslate}px, -50%)`;
+    endX = currentX;
+  }
+  
+  function touchEnd() {
+    if (!isDragging) return;
+    isDragging = false;
+    track.classList.remove('dragging');
+    
+    const itemSpace = 84; 
+    let approxIndex = Math.round(-(currentTranslate + 32) / itemSpace);
+    
+    if (approxIndex < 0) approxIndex = 0;
+    if (approxIndex >= CHAR_LIST.length) approxIndex = CHAR_LIST.length - 1;
+    
+    selectChar(approxIndex, true);
+  }
+  
+  function getPositionX(e) {
+    return e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+  }
+})();
+
+
 /* =========================================================
    1. 数据与存储
    ========================================================= */
@@ -2181,6 +2553,63 @@ function pickWords(pool, tier, n) {
 }
 function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
+/* 把 learn.html 带过来的待验证词同 tier 替换到本关敌人里；
+   多余的部分写回 sessionStorage，留到下一关继续（方案 B） */
+function applyPendingVerify(mixed) {
+  let pending = [];
+  try {
+    pending = JSON.parse(sessionStorage.getItem('dd_pending_verify') || '[]');
+  } catch (e) {}
+  if (!pending.length) return mixed;
+
+  const pendingByTier = { basic: [], core: [], extra: [] };
+  const seen = new Set();
+  pending.forEach(w => {
+    const key = (w || '').toLowerCase();
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+    ['basic', 'core', 'extra'].forEach(t => {
+      const full = GRADE_MAP[t].data.find(x => (x.w || '').toLowerCase() === key);
+      if (full && !pendingByTier[t].some(x => (x.w || '').toLowerCase() === key)) {
+        pendingByTier[t].push(full);
+      }
+    });
+  });
+
+  const leftover = [];
+  ['basic', 'core', 'extra'].forEach(t => {
+    const list = pendingByTier[t];
+    if (!list.length) return;
+    let k = 0;
+    for (let i = 0; i < mixed.length && k < list.length; i++) {
+      if (mixed[i].tier === t && !mixed[i].mystery) {
+        mixed[i] = {
+          word: list[k],
+          type: GRADE_MAP[t].type,
+          tier: t,
+          mystery: false
+        };
+        k++;
+      }
+    }
+    for (let j = k; j < list.length; j++) {
+      leftover.push((list[j].w || '').toLowerCase());
+    }
+  });
+
+  try {
+    if (leftover.length) {
+      sessionStorage.setItem('dd_pending_verify', JSON.stringify(leftover));
+    } else {
+      sessionStorage.removeItem('dd_pending_verify');
+    }
+  } catch (e) {
+    try { sessionStorage.removeItem('dd_pending_verify'); } catch (e2) {}
+  }
+
+  return mixed;
+}
+
 function placeEnemies(list) {
   const cols = [12, 31, 50, 69, 88];
   const rows = [78, 66, 54, 42];
@@ -2214,6 +2643,9 @@ function buildLevel(levelNum) {
     mysteryIdx.add(Math.floor(Math.random() * mixed.length));
   }
   mysteryIdx.forEach(i => { mixed[i].mystery = true; });
+
+  applyPendingVerify(mixed);
+
   placeEnemies(mixed);
   return mixed;
 }
@@ -3507,6 +3939,12 @@ function showResult(win) {
 /* =========================================================
    14. 入口
    ========================================================= */
+function goLearn() {
+  ac();
+  sfxClick();
+  location.href = 'learn.html';
+}
+
 function startGame() {
   ac(); sfxClick();
   document.getElementById('splashMask').classList.add('hide');
