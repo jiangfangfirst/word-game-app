@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<script>
+if(!localStorage.getItem('dd_auth')){ location.href='login.html'; }
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>单词学习 · 单词一扫光</title>
+<style>
+:root {
+  --gold: #fbbf24;
+  --green: #10b981;
+  --blue: #38bdf8;
+  --orange: #f97316;
+  --red: #ef4444;
+  --purple: #a78bfa;
+  --bg-0: #0b1220;
+  --bg-1: #0f172a;
+  --bg-2: #1b2540;
+  --line: rgba(148,163,184,.16);
+  --txt: #e2e8f0;
+  --txt-dim: #94a3b8;
+  --txt-mute: #64748b;
+  --ease-spring: cubic-bezier(.34,1.56,.64,1);
+  --ease-out: cubic-bezier(.22,1,.36,1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+  background: var(--bg-0);
+  color: var(--txt);
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+  font-size: 16px;
+}
+body.sheet-open .content-area { overflow: hidden; }
+
+/* ================= HUD ================= */
+.hud {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: linear-gradient(180deg, rgba(30,41,59,.98), rgba(15,23,42,.94));
+  border-bottom: 1px solid var(--line);
+  z-index: 20;
+  min-height: 54px;
+}
+.hud-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--gold);
+  white-space: nowrap;
+  flex: 0 0 auto;
+  padding: 4px 10px;
+  background: rgba(251,191,36,.12);
+  border: 1px solid rgba(251,191,36,.3);
+  border-radius: 8px;
+}
+.hud-stat {
+  font-size: 13px;
+  color: var(--txt-dim);
+  white-space: nowrap;
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+  padding: 4px 10px;
+  background: rgba(30,41,59,.55);
+  border-radius: 8px;
+}
+.hud-stat b { color: #f8fafc; font-size: 14px; font-weight: 900; }
+.hud-stat.today b { color: #7dd3fc; }
+.hud-user {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 700;
+  color: #e2e8f0;
+  white-space: nowrap;
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 0 0 auto;
+  padding: 4px 10px;
+  background: rgba(30,41,59,.55);
+  border-radius: 8px;
+}
+
+/* ================= 顶部搜索 ================= */
+.search-bar {
+  flex: 0 0 auto;
+  padding: 10px 14px;
+  background: rgba(15,23,42,.92);
+  border-bottom: 1px solid var(--line);
+  position: relative;
+  z-index: 30;
+}
+.search-input {
+  width: 100%;
+  padding: 11px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(148,163,184,.22);
+  background: rgba(30,41,59,.7);
+  color: var(--txt);
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color .2s;
+}
+.search-input::placeholder { color: var(--txt-mute); }
+.search-input:focus { border-color: rgba(56,189,248,.55); }
+.search-results {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  top: calc(100% - 4px);
+  background: linear-gradient(180deg, #1b2540 0%, #0f172a 100%);
+  border: 1px solid rgba(56,189,248,.32);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.05);
+  max-height: 340px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-6px);
+  transition: opacity .18s ease, transform .18s ease;
+}
+.search-results::-webkit-scrollbar { display: none; }
+.search-results.show { opacity: 1; pointer-events: auto; transform: translateY(0); }
+.search-result-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-bottom: 1px solid rgba(148,163,184,.08);
+  cursor: pointer;
+  transition: background .12s;
+}
+.search-result-item:last-child { border-bottom: none; }
+.search-result-item:active { background: rgba(56,189,248,.12); }
+.sr-w {
+  font-size: 15px;
+  font-weight: 800;
+  color: #f1f5f9;
+  flex: 0 0 auto;
+  min-width: 78px;
+}
+.sr-m {
+  font-size: 13px;
+  color: var(--txt-dim);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sr-tier {
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 6px;
+  color: #cbd5e1;
+  background: rgba(148,163,184,.16);
+}
+.sr-tier.basic { color: #7dd3fc; background: rgba(56,189,248,.14); }
+.sr-tier.core  { color: #fdba74; background: rgba(249,115,22,.14); }
+.sr-tier.extra { color: #fca5a5; background: rgba(239,68,68,.14); }
+.search-empty {
+  padding: 20px;
+  text-align: center;
+  color: var(--txt-mute);
+  font-size: 13px;
+}
+
+/* ================= 模式 Tab ================= */
+.mode-tabs {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 8px;
+  padding: 10px 14px 8px;
+  background: rgba(15,23,42,.9);
+  border-bottom: 1px solid var(--line);
+}
+.mode-tab {
+  flex: 1;
+  padding: 10px 6px;
+  border: 1px solid rgba(148,163,184,.18);
+  border-radius: 10px;
+  background: rgba(30,41,59,.55);
+  color: var(--txt-dim);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: all .18s var(--ease-out);
+}
+.mode-tab:active { transform: scale(.96); }
+.mode-tab.active {
+  background: rgba(56,189,248,.14);
+  border-color: rgba(56,189,248,.55);
+  color: #7dd3fc;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+/* ================= 筛选条 ================= */
+.filter-bar {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(15,23,42,.9);
+  border-bottom: 1px solid var(--line);
+}
+.filter-bar-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(148,163,184,.22);
+  background: rgba(30,41,59,.55);
+  color: var(--txt);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .15s;
+  text-align: left;
+  min-width: 0;
+}
+.filter-bar-btn:active { transform: scale(.98); }
+.filter-bar-btn .fb-icon {
+  font-size: 11px;
+  color: var(--txt-dim);
+  flex: 0 0 auto;
+}
+.filter-bar-btn .fb-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: .2px;
+}
+
+/* ================= 内容区 ================= */
+.content-area {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+.view { display: none; padding: 12px 14px; min-height: 100%; }
+.view.active { display: block; }
+
+/* ================= 词表 ================= */
+.word-list { display: flex; flex-direction: column; gap: 8px; }
+.word-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(30,41,59,.55);
+  border: 1px solid rgba(148,163,184,.1);
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.word-row:active { background: rgba(30,41,59,.9); border-color: rgba(56,189,248,.3); }
+.word-row-left { flex: 0 0 auto; min-width: 96px; max-width: 46%; }
+.word-row-w {
+  font-size: 16px;
+  font-weight: 700;
+  color: #f1f5f9;
+  display: block;
+  word-break: break-all;
+  line-height: 1.25;
+}
+.word-row-p {
+  font-size: 11px;
+  color: var(--txt-mute);
+  display: block;
+  margin-top: 2px;
+  font-family: "Lucida Sans Unicode", sans-serif;
+}
+.word-row-m {
+  flex: 1;
+  font-size: 14px;
+  color: #cbd5e1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.word-row-status {
+  flex: 0 0 auto;
+  font-size: 15px;
+  line-height: 1;
+}
+.word-row.status-review { border-color: rgba(167,139,250,.28); }
+.word-row.status-mastered { border-color: rgba(16,185,129,.2); }
+.word-row.status-learned { border-color: rgba(251,191,36,.28); }
+
+.empty-tip {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--txt-mute);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ================= 闪卡 ================= */
+.card-view-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: calc(100vh - 345px);
+  justify-content: center;
+  padding: 8px 0;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.card-progress {
+  text-align: center;
+  font-size: 13px;
+  color: var(--txt-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 卡片舞台（包卡片和气泡） */
+.flashcard-stage {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+/* 卡片本体 */
+.flashcard {
+  width: 100%;
+  height: 320px;
+  perspective: 1200px;
+  cursor: pointer;
+  transition: transform .3s var(--ease-out), opacity .3s var(--ease-out);
+}
+.flashcard.slide-out { transform: translateX(-115%); opacity: 0; }
+.flashcard.slide-in-prep { transform: translateX(115%); opacity: 0; transition: none; }
+.flashcard.slide-in { transform: translateX(0); opacity: 1; }
+
+.flashcard-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform .55s cubic-bezier(.22,1,.36,1);
+}
+.flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+
+.flashcard-front,
+.flashcard-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 20px;
+  border: 1px solid rgba(148,163,184,.22);
+  background: linear-gradient(180deg, #1b2540 0%, #0f172a 100%);
+  box-shadow: 0 20px 50px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 26px 22px;
+  text-align: center;
+}
+.flashcard-back {
+  transform: rotateY(180deg);
+  justify-content: space-between;
+}
+
+/* tag2 颜色（7 种渐变 + 流动动效） */
+.flashcard[data-tag2="1"] .flashcard-front,
+.flashcard[data-tag2="1"] .flashcard-back {
+  background: linear-gradient(135deg, #4a1020 0%, #7f1d1d 45%, #5c1420 70%, #7f1d1d 100%);
+  background-size: 300% 100%;
+  animation: flowGradient 9s linear infinite;
+  border-color: rgba(252,165,165,.28);
+}
+.flashcard[data-tag2="2"] .flashcard-front,
+.flashcard[data-tag2="2"] .flashcard-back {
+  background: linear-gradient(135deg, #4a2610 0%, #9a3412 45%, #5f2e13 70%, #9a3412 100%);
+  background-size: 300% 100%;
+  animation: flowGradient 9s linear infinite;
+  border-color: rgba(253,186,116,.28);
+}
+.flashcard[data-tag2="3"] .flashcard-front,
+.flashcard[data-tag2="3"] .flashcard-back {
+  background: linear-gradient(135deg, #4a3c10 0%, #a16207 45%, #5a4a12 70%, #a16207 100%);
+  background-size: 300% 100%;
+  animation: flowGradient 9s linear infinite;
+  border-color: rgba(250,204,21,.28);
+}
+.flashcard[data-tag2="4"] .flashcard-front,
+.flashcard[data-tag2="4"] .flashcard-back {
+  background: linear-gradient(135deg, #0f3a26 0%, #166534 45%, #134a30 70%, #166534 100%);
+  background-size: 300% 100%;
+  animation: flowGradient 9s linear infinite;
+  border-color: rgba(134,239,172,.28);
+}
+.flashcard[data-tag2="5"] .flashcard-front,
+.flashcard[data-tag2="5"] .flashcard-back {
+  background: linear-gradient(135deg, #0a3a44 0%, #0e7490 45%, #0f5560 70%, #0e7490 100%);
+  background-size: 300% 100%;
+  animation: flowGradient 9s linear infinite;
+  border-color: rgba(103,232,249,.28);
+}
+.flashcard[data-tag2="6"] .flashcard-front,
+.flashcard[data-tag2="6"] .flashcard-back {
+  background: linear-gradient(135deg, #102c5a 0%, #1e40af 45%, #163d80 70%, #1e40af 100%);
+  background-size: 300% 100%;
+  animation: flowGradient 9s linear infinite;
+  border-color: rgba(147,197,253,.28);
+}
+.flashcard[data-tag2="7"] .flashcard-front,
+.flashcard[data-tag2="7"] .flashcard-back {
+  background: linear-gradient(135deg, #331052 0%, #6b21a8 45%, #4a1a7a 70%, #6b21a8 100%);
+  background-size: 300% 100%;
+  animation: flowGradient 9s linear infinite;
+  border-color: rgba(216,180,254,.28);
+}
+@keyframes flowGradient {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+
+/* 学习量图标（卡片右上角） */
+.fc-stat {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  font-size: 18px;
+  line-height: 1;
+  z-index: 5;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,.5));
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .25s;
+}
+.fc-stat.show { opacity: 1; }
+
+/* 卡片正面内容 */
+.fc-word {
+  font-size: 40px;
+  font-weight: 900;
+  color: #f8fafc;
+  letter-spacing: 1px;
+  word-break: break-all;
+  line-height: 1.2;
+  margin-bottom: 10px;
+  text-shadow: 0 2px 10px rgba(0,0,0,.4);
+}
+.fc-note {
+  font-size: 13px;
+  color: rgba(255,255,255,.7);
+  letter-spacing: .5px;
+  text-align: left;
+  width: 100%;
+  padding: 0 4px;
+  min-height: 1.4em;
+  line-height: 1.4;
+  margin-bottom: 18px;
+  text-shadow: 0 1px 3px rgba(0,0,0,.4);
+}
+.fc-btns {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  justify-content: center;
+}
+.fc-btn {
+  flex: 1;
+  max-width: 160px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.22);
+  background: rgba(255,255,255,.08);
+  color: rgba(255,255,255,.9);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background .18s, border-color .18s, color .18s, opacity .18s;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fc-btn:active:not(:disabled) { transform: scale(.96); }
+.fc-btn:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+  color: rgba(255,255,255,.5);
+}
+.fc-btn.pulse {
+  background: rgba(56,189,248,.28);
+  border-color: rgba(56,189,248,.65);
+  color: #e0f2fe;
+}
+
+/* 卡片背面内容 */
+.fc-example {
+  font-size: 18px;
+  color: #f1f5f9;
+  line-height: 1.55;
+  margin-bottom: 10px;
+  word-break: break-word;
+  text-shadow: 0 1px 4px rgba(0,0,0,.4);
+  margin-top: 30px;
+}
+.fc-example-cn {
+  font-size: 14px;
+  color: rgba(255,255,255,.55);
+  line-height: 1.5;
+  margin-bottom: 20px;
+  word-break: break-word;
+}
+.fc-example.empty,
+.fc-example-cn.empty {
+  color: rgba(255,255,255,.35);
+  font-style: italic;
+  font-size: 14px;
+}
+.fc-learn-btn {
+  width: 100%;
+  max-width: 240px;
+  margin: 0 auto;
+  padding: 12px 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(251,191,36,.5);
+  background: rgba(251,191,36,.16);
+  color: #fde68a;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background .2s, border-color .2s, color .2s, opacity .2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fc-learn-btn:active:not(:disabled) { transform: scale(.97); }
+.fc-learn-btn.level-1 {
+  border-color: rgba(56,189,248,.5);
+  background: rgba(56,189,248,.16);
+  color: #bae6fd;
+}
+.fc-learn-btn.level-2 {
+  border-color: rgba(16,185,129,.5);
+  background: rgba(16,185,129,.16);
+  color: #6ee7b7;
+  cursor: default;
+}
+.fc-learn-btn:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+/* 释义浮层（卡片上方） */
+.fc-meaning-bubble {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 14px);
+  transform: translateX(-50%) translateY(8px);
+  max-width: 92%;
+  padding: 10px 18px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(56,189,248,.22), rgba(30,64,110,.92));
+  border: 1px solid rgba(56,189,248,.55);
+  color: #e0f2fe;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+  box-shadow: 0 10px 28px rgba(0,0,0,.65), 0 0 22px rgba(56,189,248,.3);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease, transform .25s ease;
+  z-index: 20;
+  word-break: break-word;
+}
+.fc-meaning-bubble.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* 底部导航（下一张） */
+.card-nav {
+  display: flex;
+  justify-content: center;
+}
+.card-next-btn {
+  min-width: 200px;
+  padding: 14px 24px;
+  border-radius: 14px;
+  border: 1px solid rgba(56,189,248,.5);
+  background: linear-gradient(180deg, rgba(56,189,248,.22), rgba(14,165,233,.16));
+  color: #bae6fd;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: .5px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .18s var(--ease-out);
+  box-shadow: 0 4px 16px rgba(56,189,248,.2), inset 0 1px 0 rgba(255,255,255,.1);
+}
+.card-next-btn:active { transform: scale(.96); }
+.card-next-btn.finish {
+  border-color: rgba(16,185,129,.5);
+  background: linear-gradient(180deg, rgba(16,185,129,.25), rgba(5,150,105,.16));
+  color: #6ee7b7;
+}
+
+/* ================= 底部 ================= */
+.footer {
+  flex: 0 0 auto;
+  padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
+  background: rgba(15,23,42,.96);
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.home-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 10px 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(148,163,184,.28);
+  background: rgba(148,163,184,.08);
+  color: var(--txt-dim);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .15s;
+}
+.home-btn:active { transform: scale(.95); }
+
+/* ================= 筛选抽屉 ================= */
+.sheet-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: rgba(2,6,23,.72);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .26s ease;
+}
+.sheet-mask.show { opacity: 1; pointer-events: auto; }
+.sheet {
+  width: 100%;
+  max-width: 560px;
+  background: linear-gradient(180deg, #1b2540 0%, #0f172a 100%);
+  border-radius: 24px 24px 0 0;
+  border: 1px solid rgba(148,163,184,.22);
+  border-bottom: none;
+  padding: 12px 20px calc(24px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -24px 70px rgba(0,0,0,.75), inset 0 1px 0 rgba(255,255,255,.06);
+  transform: translateY(100%);
+  transition: transform .34s var(--ease-out);
+}
+.sheet-mask.show .sheet { transform: translateY(0); }
+.sheet-grip {
+  width: 44px; height: 5px; border-radius: 3px;
+  background: rgba(148,163,184,.3);
+  margin: 6px auto 16px;
+}
+.sheet-title {
+  font-size: 17px; font-weight: 900; color: #f8fafc;
+  text-align: center; margin-bottom: 20px; letter-spacing: .5px;
+}
+.sheet-section-label {
+  font-size: 12px; font-weight: 800; color: var(--txt-dim);
+  margin-bottom: 10px; letter-spacing: 1px;
+}
+.sheet-group {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 8px; margin-bottom: 18px;
+}
+.sheet-group.status-group { grid-template-columns: repeat(2, 1fr); }
+.sheet-opt {
+  padding: 12px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(148,163,184,.22);
+  background: rgba(30,41,59,.55);
+  color: var(--txt-dim);
+  font-size: 14px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+  transition: all .15s;
+  white-space: nowrap; text-align: center;
+}
+.sheet-opt:active { transform: scale(.96); }
+.sheet-opt.active {
+  background: rgba(56,189,248,.16);
+  border-color: rgba(56,189,248,.55);
+  color: #7dd3fc;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+}
+.sheet-opt[data-tier="core"].active {
+  background: rgba(249,115,22,.16);
+  border-color: rgba(249,115,22,.55);
+  color: #fdba74;
+}
+.sheet-opt[data-tier="extra"].active {
+  background: rgba(239,68,68,.16);
+  border-color: rgba(239,68,68,.55);
+  color: #fca5a5;
+}
+.sheet-preview {
+  text-align: center;
+  font-size: 13px;
+  color: var(--txt-dim);
+  padding: 12px;
+  margin-bottom: 16px;
+  border-radius: 10px;
+  background: rgba(2,6,23,.4);
+  border: 1px dashed rgba(148,163,184,.2);
+  font-variant-numeric: tabular-nums;
+}
+.sheet-preview b { color: #7dd3fc; font-weight: 900; font-size: 15px; }
+.sheet-actions { display: flex; gap: 10px; }
+.sheet-btn {
+  flex: 1; padding: 14px; border-radius: 12px;
+  font-size: 15px; font-weight: 800;
+  cursor: pointer; font-family: inherit;
+  transition: all .15s; border: none;
+}
+.sheet-btn:active { transform: scale(.97); }
+.sheet-btn.cancel {
+  background: rgba(148,163,184,.1);
+  border: 1px solid rgba(148,163,184,.3);
+  color: var(--txt-dim);
+}
+.sheet-btn.apply {
+  background: linear-gradient(180deg, #38bdf8 0%, #0ea5e9 52%, #0369a1 100%);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(56,189,248,.3), inset 0 1px 0 rgba(255,255,255,.3);
+}
+
+/* ================= Toast ================= */
+.toast-wrap {
+  position: fixed;
+  left: 50%; top: 14%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 10px;
+  pointer-events: none;
+  width: max-content; max-width: 92%;
+}
+.toast {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px; border-radius: 12px;
+  background: linear-gradient(180deg, rgba(30,41,59,.98), rgba(15,23,42,.98));
+  border: 1px solid rgba(251,191,36,.5);
+  box-shadow: 0 10px 30px rgba(0,0,0,.62), 0 0 22px rgba(251,191,36,.18), inset 0 1px 0 rgba(255,255,255,.08);
+  animation: toastIn .38s var(--ease-spring), toastOut .42s ease-in 3.4s forwards;
+  white-space: nowrap;
+}
+@keyframes toastIn {
+  0% { transform: translateY(-14px) scale(.8); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes toastOut { to { transform: translateY(-12px) scale(.92); opacity: 0; } }
+.toast-icon { font-size: 20px; line-height: 1; }
+.toast-text { display: flex; flex-direction: column; gap: 2px; }
+.toast-text b { font-size: 14px; font-weight: 900; }
+.toast-text span { font-size: 12px; color: var(--txt-dim); }
+
+/* ================= 复习仓提示 ================= */
+.review-tip {
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(167,139,250,.32);
+  background: rgba(167,139,250,.1);
+  color: #c4b5fd;
+  font-size: 12px;
+  line-height: 1.5;
+}
+</style>
+</head>
+<body>
+
+<!-- HUD -->
+<div class="hud">
+  <div class="hud-title">📖 学习</div>
+  <div class="hud-stat today">今日 <b id="hudToday">0</b> 词</div>
+  <div class="hud-user" id="hudUser">同学</div>
+</div>
+
+<!-- 顶部搜索 -->
+<div class="search-bar">
+  <input type="text" class="search-input" id="searchInput" placeholder="🔍 搜索单词或释义" autocapitalize="none" autocorrect="off" spellcheck="false">
+  <div class="search-results" id="searchResults"></div>
+</div>
+
+<!-- 模式 Tab -->
+<div class="mode-tabs">
+  <button class="mode-tab active" data-mode="list">📋 词表</button>
+  <button class="mode-tab" data-mode="card">🃏 闪卡</button>
+</div>
+
+<!-- 筛选条 -->
+<div class="filter-bar">
+  <button class="filter-bar-btn" onclick="openFilterSheet()">
+    <span class="fb-icon">▾</span>
+    <span class="fb-text" id="filterBarText">基础 · 未学 · 0 词</span>
+  </button>
+</div>
+
+<!-- 内容区 -->
+<div class="content-area">
+
+  <!-- 词表 -->
+  <div class="view view-list active" id="viewList">
+    <div class="word-list" id="wordList"></div>
+  </div>
+
+  <!-- 闪卡 -->
+  <div class="view view-card" id="viewCard">
+    <div class="card-view-wrap">
+      <div class="card-progress" id="cardProgress">1 / 20</div>
+
+      <div class="flashcard-stage" id="flashcardStage">
+        <div class="flashcard" id="flashcard" data-tag2="0">
+          <div class="fc-stat" id="fcStat"></div>
+          <div class="flashcard-inner" id="flashcardInner">
+            <div class="flashcard-front">
+              <div class="fc-word" id="fcWord">—</div>
+              <div class="fc-note" id="fcNote"></div>
+              <div class="fc-btns">
+                <button class="fc-btn" id="fcMeaningBtn" type="button">CHINESE</button>
+                <button class="fc-btn" id="fcSoundBtn" type="button">PRONUNCIATION</button>
+              </div>
+            </div>
+            <div class="flashcard-back">
+              <div class="fc-example" id="fcExample"></div>
+              <div class="fc-example-cn" id="fcExampleCn"></div>
+              <button class="fc-learn-btn" id="fcLearnBtn" type="button">已经学会</button>
+            </div>
+          </div>
+        </div>
+        <div class="fc-meaning-bubble" id="fcMeaningBubble"></div>
+      </div>
+
+      <div class="card-nav">
+        <button class="card-next-btn" id="cardNextBtn" type="button">NEXT</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 底部 -->
+<div class="footer">
+  <button class="home-btn" onclick="backToGame()">🏠 返回游戏</button>
+</div>
+
+<!-- 筛选抽屉 -->
+<div class="sheet-mask" id="filterSheetMask">
+  <div class="sheet">
+    <div class="sheet-grip"></div>
+    <div class="sheet-title">筛选学习范围</div>
+
+    <div class="sheet-section-label">📚 词库层级</div>
+    <div class="sheet-group" id="tierGroup">
+      <button class="sheet-opt" data-tier="basic">基础</button>
+      <button class="sheet-opt" data-tier="core">核心</button>
+      <button class="sheet-opt" data-tier="extra">拓展</button>
+    </div>
+
+    <div class="sheet-section-label">🏷️ 学习状态</div>
+    <div class="sheet-group status-group" id="statusGroup">
+      <button class="sheet-opt" data-filter="all">全部</button>
+      <button class="sheet-opt" data-filter="new">未学</button>
+      <button class="sheet-opt" data-filter="level1">📌 已学过</button>
+      <button class="sheet-opt" data-filter="level2">⭐ 已学会</button>
+    </div>
+
+    <div class="sheet-preview" id="sheetPreview">基础 · 未学 · <b>0</b> 词</div>
+
+    <div class="sheet-actions">
+      <button class="sheet-btn cancel" onclick="closeFilterSheet()">取消</button>
+      <button class="sheet-btn apply" onclick="applyFilter()">应用</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+<script src="gradewords.js?v=20261001"></script>
+<script>
+/* =========================================================
+   0. 基础常量与存储
+   ========================================================= */
+const _auth = localStorage.getItem('dd_auth') || 'guest';
+const _userName = (localStorage.getItem('dd_name') || '同学').trim();
+
+const GRADE_MAP = {
+  basic: { data: (typeof WORDS_BASIC !== 'undefined' ? WORDS_BASIC : []), label: '基础' },
+  core:  { data: (typeof WORDS_CORE  !== 'undefined' ? WORDS_CORE  : []), label: '核心' },
+  extra: { data: (typeof WORDS_EXTRA !== 'undefined' ? WORDS_EXTRA : []), label: '拓展' }
+};
+const TIERS = ['basic', 'core', 'extra'];
+const TIER_LABEL = { basic: '基础', core: '核心', extra: '拓展' };
+const FILTER_LABEL = { all: '全部', new: '未学', level1: '已学过', level2: '已学会' };
+
+const GAME_KEY = 'dd_vg10_' + _auth;
+const STUDY_KEY = 'dd_study_' + _auth;
+
+function loadGameStore() {
+  try {
+    const raw = localStorage.getItem(GAME_KEY);
+    if (raw) {
+      const j = JSON.parse(raw);
+      return {
+        mastered: j.mastered || { basic: [], core: [], extra: [] },
+        review: j.review || { basic: [], core: [], extra: [] },
+        items: j.items || { speaker: 0, highlight: 0, firstLetter: 0 }
+      };
+    }
+  } catch (e) {}
+  return {
+    mastered: { basic: [], core: [], extra: [] },
+    review: { basic: [], core: [], extra: [] },
+    items: { speaker: 0, highlight: 0, firstLetter: 0 }
+  };
+}
+function saveGameItems(items) {
+  try {
+    const raw = localStorage.getItem(GAME_KEY);
+    let j = {};
+    if (raw) { try { j = JSON.parse(raw); } catch (e) {} }
+    j.items = items;
+    localStorage.setItem(GAME_KEY, JSON.stringify(j));
+  } catch (e) {}
+}
+
+function defaultStudy() {
+  return {
+    learnLevel: {},
+    learnStats: {},
+    stats: {},
+    filters: { tier: 'basic', status: 'new' }
+  };
+}
+function loadStudy() {
+  try {
+    const raw = localStorage.getItem(STUDY_KEY);
+    if (raw) {
+      const j = JSON.parse(raw);
+      return {
+        learnLevel: j.learnLevel || {},
+        learnStats: j.learnStats || {},
+        stats: j.stats || {},
+        filters: j.filters || { tier: 'basic', status: 'new' }
+      };
+    }
+  } catch (e) {}
+  return defaultStudy();
+}
+function saveStudy(s) {
+  try { localStorage.setItem(STUDY_KEY, JSON.stringify(s)); } catch (e) {}
+}
+
+/* =========================================================
+   1. 工具函数
+   ========================================================= */
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function splitMeanings(m) {
+  if (!m) return [];
+  return m.split(/[；;]/).map(x => x.trim()).filter(Boolean);
+}
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0');
+}
+
+/* =========================================================
+   2. 音效
+   ========================================================= */
+let _actx = null;
+function ac() {
+  if (!_actx) { try { _actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (_actx && _actx.state === 'suspended') _actx.resume();
+  return _actx;
+}
+function beep(freq, dur, type, vol, delay) {
+  const c = ac(); if (!c) return;
+  const d = delay || 0;
+  try {
+    const t = c.currentTime + d;
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = type || 'sine';
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(vol || .07, t);
+    g.gain.exponentialRampToValueAtTime(.0008, t + dur);
+    o.connect(g); g.connect(c.destination);
+    o.start(t); o.stop(t + dur + .02);
+  } catch (e) {}
+}
+function sfxClick() { beep(1150, .03, 'triangle', .05); }
+function sfxFlip()  { beep(900, .05, 'triangle', .05); }
+function sfxGood()  { beep(660, .09, 'sine', .08); beep(990, .14, 'sine', .08, .08); }
+function sfxLearned() {
+  beep(523, .1, 'triangle', .08);
+  beep(784, .12, 'triangle', .08, .1);
+  beep(1047, .18, 'triangle', .08, .22);
+}
+
+/* =========================================================
+   3. 语音
+   ========================================================= */
+let _speakAudio = null;
+function speak(text) {
+  if (!text) return;
+  try {
+    if (!_speakAudio) _speakAudio = new Audio();
+    _speakAudio.src = 'https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(text) + '&type=1';
+    _speakAudio.play().catch(() => {});
+  } catch (e) {}
+}
+
+/* =========================================================
+   4. 状态计算
+   ========================================================= */
+function getLearnLevel(wordKey) {
+  const s = loadStudy();
+  return s.learnLevel[wordKey] || 0;
+}
+function setLearnLevel(wordKey, lv) {
+  const s = loadStudy();
+  s.learnLevel[wordKey] = lv;
+  saveStudy(s);
+}
+
+function getWordStatusInGame(word, tier) {
+  const g = loadGameStore();
+  const key = (word.w || '').toLowerCase();
+  if ((g.mastered[tier] || []).some(x => x.toLowerCase() === key)) return 'mastered';
+  if ((g.review[tier] || []).some(x => x.toLowerCase() === key)) return 'review';
+  return '';
+}
+
+function getStudyStat(wordKey) {
+  const s = loadStudy();
+  return s.learnStats[wordKey] || { showMeaning: 0, playSound: 0, search: 0 };
+}
+function bumpStudyStat(wordKey, field) {
+  const s = loadStudy();
+  if (!s.learnStats[wordKey]) s.learnStats[wordKey] = { showMeaning: 0, playSound: 0, search: 0 };
+  s.learnStats[wordKey][field] = (s.learnStats[wordKey][field] || 0) + 1;
+  s.learnStats[wordKey].lastAt = Date.now();
+  saveStudy(s);
+}
+function totalStudyCount(wordKey) {
+  const st = getStudyStat(wordKey);
+  return (st.showMeaning || 0) + (st.playSound || 0) + (st.search || 0);
+}
+function getStudyIcon(wordKey) {
+  const n = totalStudyCount(wordKey);
+  if (n === 0) return '';
+  if (n <= 2) return '🌱';
+  if (n <= 5) return '🔥';
+  return '💎';
+}
+
+/* 今日学习：翻转过 + 点过释义 + (无音标 or 点过音标) */
+function markStudied(wordKey) {
+  const s = loadStudy();
+  const t = todayStr();
+  if (!s.stats[t]) s.stats[t] = { studied: [] };
+  if (!s.stats[t].studied.includes(wordKey)) {
+    s.stats[t].studied.push(wordKey);
+    saveStudy(s);
+    updateHUD();
+  }
+}
+function getTodayCount() {
+  const s = loadStudy();
+  const t = todayStr();
+  return (s.stats[t] && s.stats[t].studied) ? s.stats[t].studied.length : 0;
+}
+
+/* =========================================================
+   5. 筛选池
+   ========================================================= */
+let currentTier = 'basic';
+let currentStatus = 'new';
+
+function filterWords(tier, status) {
+  const pool = GRADE_MAP[tier].data;
+  const s = loadStudy();
+  const lv = s.learnLevel;
+  return pool.filter(w => {
+    const key = (w.w || '').toLowerCase();
+    const level = lv[key] || 0;
+    switch (status) {
+      case 'all':    return true;
+      case 'new':    return level === 0;
+      case 'level1': return level === 1;
+      case 'level2': return level === 2;
+      default:       return true;
+    }
+  });
+}
+function getFilteredWords() {
+  return filterWords(currentTier, currentStatus);
+}
+function countFiltered(tier, status) {
+  return filterWords(tier, status).length;
+}
+
+function updateFilterBar() {
+  const n = getFilteredWords().length;
+  document.getElementById('filterBarText').textContent =
+    TIER_LABEL[currentTier] + ' · ' + FILTER_LABEL[currentStatus] + ' · ' + n + ' 词';
+}
+
+function updateHUD() {
+  document.getElementById('hudToday').textContent = getTodayCount();
+  document.getElementById('hudUser').textContent = _userName;
+}
+
+/* =========================================================
+   6. 全局状态
+   ========================================================= */
+let currentMode = 'list';
+
+/* 闪卡状态 */
+let deckQueue = [];           // 本轮卡片队列
+let deckIdx = 0;
+let deckRoundOver = false;
+let roundLeveled = new Set(); // 本轮内已经点过「已经学会」的词
+let singleMode = null;        // 单卡模式：{ word, tier } 或 null
+let cardFlipped = false;
+let cardMeaningTimer = null;
+let cardSoundTimer = null;
+let cardTappedThisTime = { meaning: false, sound: false, flipped: false };
+let cardSlideTimer = null;
+
+/* =========================================================
+   7. 视图切换
+   ========================================================= */
+function switchMode(mode) {
+  currentMode = mode;
+  document.querySelectorAll('.mode-tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.mode === mode);
+  });
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  if (mode === 'list') {
+    document.getElementById('viewList').classList.add('active');
+    renderList();
+  } else if (mode === 'card') {
+    document.getElementById('viewCard').classList.add('active');
+    if (singleMode) renderCardFace();
+    else startDeck();
+  }
+}
+
+/* =========================================================
+   8. 筛选抽屉
+   ========================================================= */
+let sheetTier = 'basic';
+let sheetStatus = 'new';
+
+function openFilterSheet() {
+  sheetTier = currentTier;
+  sheetStatus = currentStatus;
+  updateSheetSelection();
+  document.getElementById('filterSheetMask').classList.add('show');
+  document.body.classList.add('sheet-open');
+}
+function closeFilterSheet() {
+  document.getElementById('filterSheetMask').classList.remove('show');
+  document.body.classList.remove('sheet-open');
+}
+function updateSheetSelection() {
+  document.querySelectorAll('#tierGroup .sheet-opt').forEach(b => {
+    b.classList.toggle('active', b.dataset.tier === sheetTier);
+  });
+  document.querySelectorAll('#statusGroup .sheet-opt').forEach(b => {
+    b.classList.toggle('active', b.dataset.filter === sheetStatus);
+  });
+  const count = countFiltered(sheetTier, sheetStatus);
+  document.getElementById('sheetPreview').innerHTML =
+    TIER_LABEL[sheetTier] + ' · ' + FILTER_LABEL[sheetStatus] + ' · <b>' + count + '</b> 词';
+}
+function applyFilter() {
+  currentTier = sheetTier;
+  currentStatus = sheetStatus;
+  const s = loadStudy();
+  s.filters = { tier: currentTier, status: currentStatus };
+  saveStudy(s);
+  closeFilterSheet();
+  updateFilterBar();
+  if (currentMode === 'list') renderList();
+  else if (currentMode === 'card') {
+    singleMode = null;
+    startDeck();
+  }
+}
+document.getElementById('filterSheetMask').addEventListener('click', function (e) {
+  if (e.target === this) closeFilterSheet();
+});
+document.querySelectorAll('#tierGroup .sheet-opt').forEach(btn => {
+  btn.addEventListener('click', () => { sheetTier = btn.dataset.tier; updateSheetSelection(); });
+});
+document.querySelectorAll('#statusGroup .sheet-opt').forEach(btn => {
+  btn.addEventListener('click', () => { sheetStatus = btn.dataset.filter; updateSheetSelection(); });
+});
+
+/* =========================================================
+   9. 词表视图
+   ========================================================= */
+const wordListEl = document.getElementById('wordList');
+
+function renderList() {
+  const words = getFilteredWords();
+  if (!words.length) {
+    wordListEl.innerHTML = '<div class="empty-tip">这个筛选下没有单词 🎉<br>试试切换筛选条件</div>';
+    return;
+  }
+  const s = loadStudy();
+  const html = words.map(w => {
+    const key = (w.w || '').toLowerCase();
+    const level = s.learnLevel[key] || 0;
+    const gameStatus = getWordStatusInGame(w, currentTier);
+    const m = w.m || '';
+    const firstM = splitMeanings(m)[0] || m;
+    let icon = '';
+    let rowCls = '';
+    if (level === 2) { icon = '⭐'; rowCls = ' status-learned'; }
+    else if (level === 1) { icon = '📌'; rowCls = ' status-learned'; }
+    else if (gameStatus === 'mastered') { icon = '🏆'; rowCls = ' status-mastered'; }
+    else if (gameStatus === 'review') { icon = '🔁'; rowCls = ' status-review'; }
+    const studyIcon = getStudyIcon(key);
+    return (
+      '<div class="word-row' + rowCls + '" data-w="' + escapeHtml(w.w) + '">' +
+        '<div class="word-row-left">' +
+          '<span class="word-row-w">' + escapeHtml(w.w) + '</span>' +
+          '<span class="word-row-p">' + escapeHtml(w.p || '') + '</span>' +
+        '</div>' +
+        '<div class="word-row-m">' + escapeHtml(firstM) + '</div>' +
+        (studyIcon ? '<span class="word-row-status">' + studyIcon + '</span>' : '') +
+        (icon ? '<span class="word-row-status">' + icon + '</span>' : '') +
+      '</div>'
+    );
+  }).join('');
+  wordListEl.innerHTML = html;
+}
+
+wordListEl.addEventListener('click', e => {
+  const row = e.target.closest('.word-row');
+  if (!row) return;
+  const key = row.dataset.w;
+  const word = GRADE_MAP[currentTier].data.find(x => x.w === key);
+  if (word) enterSingleCard(word, currentTier);
+});
+
+/* =========================================================
+   10. 顶部搜索
+   ========================================================= */
+const searchInput = document.getElementById('searchInput');
+const searchResults = document.getElementById('searchResults');
+let searchDebounce = null;
+
+function doSearch(q) {
+  q = (q || '').trim().toLowerCase();
+  if (!q) {
+    searchResults.classList.remove('show');
+    searchResults.innerHTML = '';
+    return;
+  }
+  const matches = [];
+  for (const tier of TIERS) {
+    for (const w of GRADE_MAP[tier].data) {
+      const k = (w.w || '').toLowerCase();
+      const m = (w.m || '').toLowerCase();
+      if (k.includes(q) || m.includes(q)) {
+        matches.push({ word: w, tier });
+        if (matches.length >= 50) break;
+      }
+    }
+    if (matches.length >= 50) break;
+  }
+  if (!matches.length) {
+    searchResults.innerHTML = '<div class="search-empty">没有匹配的单词</div>';
+    searchResults.classList.add('show');
+    return;
+  }
+  searchResults.innerHTML = matches.map((x, i) => {
+    const firstM = splitMeanings(x.word.m)[0] || x.word.m || '';
+    return '<div class="search-result-item" data-idx="' + i + '">' +
+      '<span class="sr-w">' + escapeHtml(x.word.w) + '</span>' +
+      '<span class="sr-m">' + escapeHtml(firstM) + '</span>' +
+      '<span class="sr-tier ' + x.tier + '">' + TIER_LABEL[x.tier] + '</span>' +
+    '</div>';
+  }).join('');
+  searchResults.classList.add('show');
+  searchResults.querySelectorAll('.search-result-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const idx = parseInt(el.dataset.idx, 10);
+      const hit = matches[idx];
+      if (!hit) return;
+      const key = (hit.word.w || '').toLowerCase();
+      bumpStudyStat(key, 'search');
+      searchInput.value = '';
+      searchResults.classList.remove('show');
+      searchResults.innerHTML = '';
+      enterSingleCard(hit.word, hit.tier);
+    });
+  });
+}
+
+searchInput.addEventListener('input', () => {
+  clearTimeout(searchDebounce);
+  searchDebounce = setTimeout(() => doSearch(searchInput.value), 150);
+});
+searchInput.addEventListener('blur', () => {
+  setTimeout(() => {
+    searchResults.classList.remove('show');
+  }, 220);
+});
+searchInput.addEventListener('focus', () => {
+  if (searchInput.value.trim()) doSearch(searchInput.value);
+});
+document.addEventListener('click', e => {
+  if (!e.target.closest('.search-bar')) searchResults.classList.remove('show');
+});
+
+/* =========================================================
+   11. 闪卡核心
+   ========================================================= */
+const el = {
+  progress: document.getElementById('cardProgress'),
+  stage: document.getElementById('flashcardStage'),
+  card: document.getElementById('flashcard'),
+  inner: document.getElementById('flashcardInner'),
+  word: document.getElementById('fcWord'),
+  note: document.getElementById('fcNote'),
+  example: document.getElementById('fcExample'),
+  exampleCn: document.getElementById('fcExampleCn'),
+  learnBtn: document.getElementById('fcLearnBtn'),
+  meaningBtn: document.getElementById('fcMeaningBtn'),
+  soundBtn: document.getElementById('fcSoundBtn'),
+  meaningBubble: document.getElementById('fcMeaningBubble'),
+  stat: document.getElementById('fcStat'),
+  nextBtn: document.getElementById('cardNextBtn')
+};
+
+const DECK_SIZE = 20;
+
+function startDeck() {
+  const pool = getFilteredWords().filter(w => {
+    const key = (w.w || '').toLowerCase();
+    return getLearnLevel(key) !== 2;
+  });
+  if (!pool.length) {
+    deckQueue = [];
+    deckIdx = 0;
+    deckRoundOver = true;
+    showRoundEmpty();
+    return;
+  }
+  const n = Math.min(DECK_SIZE, pool.length);
+  deckQueue = shuffle(pool).slice(0, n);
+  deckIdx = 0;
+  deckRoundOver = false;
+  roundLeveled = new Set();
+  cardTappedThisTime = { meaning: false, sound: false, flipped: false };
+  singleMode = null;
+  renderCardFace(true);
+}
+
+function showRoundEmpty() {
+  el.progress.textContent = '0 / 0';
+  el.word.textContent = '—';
+  el.note.textContent = '';
+  el.example.textContent = '';
+  el.exampleCn.textContent = '';
+  el.stat.classList.remove('show');
+  el.card.classList.remove('flipped');
+  el.card.setAttribute('data-tag2', '0');
+  el.learnBtn.style.display = 'none';
+  el.meaningBtn.disabled = true;
+  el.soundBtn.disabled = true;
+  el.nextBtn.textContent = '← 返回词表';
+  el.nextBtn.classList.remove('finish');
+}
+
+function showRoundFinished() {
+  el.progress.textContent = deckQueue.length + ' / ' + deckQueue.length;
+  el.word.textContent = '🎉';
+  el.note.textContent = '本轮完成';
+  el.example.textContent = '你已经过完这一轮';
+  el.exampleCn.textContent = '点下方按钮继续下一轮';
+  el.stat.classList.remove('show');
+  el.card.classList.remove('flipped');
+  el.card.setAttribute('data-tag2', '0');
+  el.learnBtn.style.display = 'none';
+  el.meaningBtn.disabled = true;
+  el.soundBtn.disabled = true;
+  el.nextBtn.textContent = '继续 →';
+  el.nextBtn.classList.add('finish');
+}
+
+function enterSingleCard(word, tier) {
+  singleMode = { word, tier };
+  currentTier = tier;
+  switchMode('card');
+  renderCardFace(true);
+}
+
+function getCurrentCardWord() {
+  if (singleMode) return singleMode.word;
+  if (deckRoundOver || deckIdx >= deckQueue.length) return null;
+  return deckQueue[deckIdx];
+}
+
+function renderCardFace(noAnim) {
+  clearTimeout(cardMeaningTimer);
+  clearTimeout(cardSoundTimer);
+  el.meaningBubble.classList.remove('show');
+  el.meaningBtn.textContent = 'CHINESE';
+  el.meaningBtn.classList.remove('pulse');
+  el.soundBtn.textContent = 'PRONUNCIATION';
+  el.soundBtn.classList.remove('pulse');
+  el.card.classList.remove('flipped');
+  cardFlipped = false;
+  cardTappedThisTime = { meaning: false, sound: false, flipped: false };
+  el.progress.style.display = '';
+
+  if (singleMode) {
+    const w = singleMode.word;
+    el.progress.style.display = 'none';
+    fillCard(w);
+    el.nextBtn.textContent = 'CLOSE';
+    el.nextBtn.classList.remove('finish');
+    return;
+  }
+
+  const w = deckQueue[deckIdx];
+  el.progress.textContent = (deckIdx + 1) + ' / ' + deckQueue.length;
+  fillCard(w);
+  el.nextBtn.textContent = 'NEXT';
+  el.nextBtn.classList.remove('finish');
+}
+
+function fillCard(w) {
+  const key = (w.w || '').toLowerCase();
+  el.word.textContent = w.w || '—';
+  el.note.textContent = w.tag1 || '';
+  el.example.textContent = w.en || '暂无例句';
+  el.exampleCn.textContent = w.cn || '';
+  el.example.classList.toggle('empty', !w.en);
+  el.exampleCn.classList.toggle('empty', !w.cn);
+
+  const t2 = Number(w.tag2);
+  if (t2 >= 1 && t2 <= 7) el.card.setAttribute('data-tag2', String(t2));
+  else el.card.setAttribute('data-tag2', '0');
+
+  const studyIcon = getStudyIcon(key);
+  if (studyIcon) { el.stat.textContent = studyIcon; el.stat.classList.add('show'); }
+  else { el.stat.textContent = ''; el.stat.classList.remove('show'); }
+
+  el.soundBtn.disabled = !w.p;
+
+  el.learnBtn.style.display = '';
+  const level = getLearnLevel(key);
+  el.learnBtn.classList.remove('level-1', 'level-2');
+  if (level === 2) {
+    el.learnBtn.textContent = '⭐ 已学会';
+    el.learnBtn.classList.add('level-2');
+    el.learnBtn.disabled = true;
+  } else if (level === 1) {
+    el.learnBtn.textContent = '📌 已学过';
+    el.learnBtn.classList.add('level-1');
+    if (roundLeveled.has(key)) {
+      el.learnBtn.disabled = true;
+    } else {
+      el.learnBtn.disabled = false;
+    }
+  } else {
+    el.learnBtn.textContent = '已经学会';
+    el.learnBtn.disabled = false;
+  }
+}
+
+function flipCard() {
+  if (singleMode) {
+    if (!singleMode.word) return;
+  } else {
+    const w = getCurrentCardWord();
+    if (!w) return;
+  }
+  cardFlipped = !cardFlipped;
+  el.card.classList.toggle('flipped', cardFlipped);
+  sfxFlip();
+  if (cardFlipped) {
+    cardTappedThisTime.flipped = true;
+    checkTodayLearned();
+  }
+}
+
+el.inner.addEventListener('click', e => {
+  if (e.target.closest('.fc-btn') || e.target.closest('.fc-learn-btn')) return;
+  flipCard();
+});
+
+/* 显示释义 */
+el.meaningBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  const w = singleMode ? singleMode.word : getCurrentCardWord();
+  if (!w) return;
+  const key = (w.w || '').toLowerCase();
+  bumpStudyStat(key, 'showMeaning');
+  cardTappedThisTime.meaning = true;
+  el.meaningBubble.textContent = w.m || '（无释义）';
+  el.meaningBubble.classList.add('show');
+  el.meaningBtn.classList.add('pulse');
+  clearTimeout(cardMeaningTimer);
+  cardMeaningTimer = setTimeout(() => {
+    el.meaningBubble.classList.remove('show');
+    el.meaningBtn.classList.remove('pulse');
+  }, 2000);
+  sfxClick();
+  const studyIcon = getStudyIcon(key);
+  if (studyIcon) { el.stat.textContent = studyIcon; el.stat.classList.add('show'); }
+  checkTodayLearned();
+});
+
+/* 音标 */
+el.soundBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  const w = singleMode ? singleMode.word : getCurrentCardWord();
+  if (!w || !w.p) return;
+  const key = (w.w || '').toLowerCase();
+  bumpStudyStat(key, 'playSound');
+  cardTappedThisTime.sound = true;
+  speak(w.w);
+  el.soundBtn.textContent = w.p;
+  el.soundBtn.classList.add('pulse');
+  clearTimeout(cardSoundTimer);
+  cardSoundTimer = setTimeout(() => {
+    el.soundBtn.textContent = 'PRONUNCIATION';
+    el.soundBtn.classList.remove('pulse');
+  }, 2000);
+  const studyIcon = getStudyIcon(key);
+  if (studyIcon) { el.stat.textContent = studyIcon; el.stat.classList.add('show'); }
+  checkTodayLearned();
+});
+
+/* 已经学会（两级） */
+el.learnBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  const w = singleMode ? singleMode.word : getCurrentCardWord();
+  if (!w) return;
+  const key = (w.w || '').toLowerCase();
+  const level = getLearnLevel(key);
+  if (level === 2) return;
+  if (level === 0) {
+    setLearnLevel(key, 1);
+    roundLeveled.add(key);
+    el.learnBtn.textContent = '📌 已学过';
+    el.learnBtn.classList.remove('level-2');
+    el.learnBtn.classList.add('level-1');
+    el.learnBtn.disabled = true;
+    sfxClick();
+    if (currentMode === 'list') renderList();
+    updateFilterBar();
+  } else if (level === 1) {
+    setLearnLevel(key, 2);
+    el.learnBtn.textContent = '⭐ 已学会';
+    el.learnBtn.classList.remove('level-1');
+    el.learnBtn.classList.add('level-2');
+    el.learnBtn.disabled = true;
+    sfxLearned();
+    showToast('⭐', '已学会', '这个词不再出现在随机抽卡中', '#10b981');
+    if (currentMode === 'list') renderList();
+    updateFilterBar();
+  }
+});
+
+/* 今日学习：翻转过 + 点过释义 + (无音标 or 点过音标) */
+function checkTodayLearned() {
+  const w = singleMode ? singleMode.word : getCurrentCardWord();
+  if (!w) return;
+  const key = (w.w || '').toLowerCase();
+  const hasMeaning = cardTappedThisTime.meaning;
+  const hasFlipped = cardTappedThisTime.flipped;
+  const needSound = !!w.p;
+  const hasSound = cardTappedThisTime.sound;
+  if (hasFlipped && hasMeaning && (!needSound || hasSound)) {
+    markStudied(key);
+  }
+}
+
+/* 下一张 / 继续 / 返回 */
+el.nextBtn.addEventListener('click', () => {
+  if (singleMode) {
+    singleMode = null;
+    switchMode('list');
+    return;
+  }
+  if (deckRoundOver) {
+    startDeck();
+    return;
+  }
+  if (deckIdx >= deckQueue.length) {
+    showRoundFinished();
+    deckRoundOver = true;
+    return;
+  }
+  slideOut(() => {
+    deckIdx++;
+    if (deckIdx >= deckQueue.length) {
+      deckRoundOver = true;
+      renderCardFace();
+    } else {
+      renderCardFace();
+    }
+  });
+});
+
+function slideOut(cb) {
+  clearTimeout(cardSlideTimer);
+  el.card.classList.add('slide-out');
+  cardSlideTimer = setTimeout(() => {
+    cb && cb();
+    el.card.classList.remove('slide-out');
+    el.card.style.transition = 'none';
+    el.card.style.transform = 'translateX(115%)';
+    el.card.style.opacity = '0';
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        el.card.style.transition = '';
+        el.card.style.transform = '';
+        el.card.style.opacity = '';
+      });
+    });
+  }, 280);
+}
+
+/* =========================================================
+   12. Toast
+   ========================================================= */
+function showToast(emoji, title, desc, color) {
+  const wrap = document.getElementById('toastWrap');
+  if (!wrap) return;
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.style.borderColor = color + '80';
+  t.innerHTML =
+    '<span class="toast-icon">' + emoji + '</span>' +
+    '<span class="toast-text"><b style="color:' + color + '">' + title + '</b><span>' + desc + '</span></span>';
+  wrap.appendChild(t);
+  setTimeout(() => t.remove(), 3900);
+}
+
+/* =========================================================
+   13. 跳转
+   ========================================================= */
+function backToGame() {
+  location.href = 'index.html';
+}
+
+/* =========================================================
+   14. 事件绑定 & 初始化
+   ========================================================= */
+document.querySelectorAll('.mode-tab').forEach(btn => {
+  btn.addEventListener('click', () => switchMode(btn.dataset.mode));
+});
+
+document.addEventListener('click', function once() {
+  ac();
+  document.removeEventListener('click', once);
+});
+
+(function init() {
+  const s = loadStudy();
+  if (s.filters) {
+    currentTier = s.filters.tier || 'basic';
+    currentStatus = s.filters.status || 'new';
+  }
+  updateHUD();
+  updateFilterBar();
+  renderList();
+})();
+</script>
+</body>
+</html>
