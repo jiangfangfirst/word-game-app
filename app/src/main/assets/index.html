@@ -437,9 +437,9 @@ body { font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-ser
 </div>
 
 <div class="hud">
-  <div class="level-badge" id="levelBadge">
+    <div class="level-badge" id="levelBadge">
     <span id="levelPrefix">第</span> <span id="levelNum">1</span> 关
-    <span class="lv-total">/ 共 <span id="totalLevels">20</span> 关</span>
+    <span class="lv-total">· 剩余 <span id="totalLevels">500</span> <span id="lvUnit">词</span></span>
   </div>
   <div class="rank-badge" id="rankBadge"></div>
   <div class="enemy-count">本关剩 <b id="enemyLeft">20</b></div>
@@ -712,6 +712,7 @@ function defaultStore() {
     level: 1,
     mastered: { basic: [], core: [], extra: [] },
     review: { basic: [], core: [], extra: [] },
+    missedByAI: { basic: [], core: [], extra: [] },
     items: { speaker: 0, highlight: 0, firstLetter: 0 },
     speakerMilestone: 0,
     bestHp: 100,
@@ -725,10 +726,11 @@ function loadStore() {
       const j = JSON.parse(raw);
       let items = j.items || { speaker: 0, highlight: 0 };
       if (items.firstLetter === undefined) items.firstLetter = 0;
-      return {
+            return {
         level: j.level || 1,
         mastered: j.mastered || { basic: [], core: [], extra: [] },
         review: j.review || { basic: [], core: [], extra: [] },
+        missedByAI: j.missedByAI || { basic: [], core: [], extra: [] },
         items: items,
         speakerMilestone: j.speakerMilestone || 0,
         bestHp: j.bestHp || 100,
@@ -755,6 +757,27 @@ function addToReview(tier, word) {
   const w = (word || '').toLowerCase();
   if (w && !s.review[tier].includes(w)) s.review[tier].push(w);
   STORE = s; saveStore(s); updateReviewCount();
+}
+function addMissedByAI(tier, word) {
+  const s = loadStore();
+  const w = (word || '').toLowerCase();
+  if (!w) return;
+  // 已经掌握的词不需要补回
+  if ((s.mastered[tier] || []).includes(w)) return;
+  if (!s.missedByAI) s.missedByAI = { basic: [], core: [], extra: [] };
+  if (!s.missedByAI[tier]) s.missedByAI[tier] = [];
+  if (!s.missedByAI[tier].includes(w)) s.missedByAI[tier].push(w);
+  STORE = s; saveStore(s);
+}
+
+function getRemainingWords() {
+  const s = loadStore();
+  const total = GRADE_MAP.basic.data.length + GRADE_MAP.core.data.length + GRADE_MAP.extra.data.length;
+  const masteredCount =
+    ((s.mastered && s.mastered.basic && s.mastered.basic.length) || 0) +
+    ((s.mastered && s.mastered.core && s.mastered.core.length) || 0) +
+    ((s.mastered && s.mastered.extra && s.mastered.extra.length) || 0);
+  return Math.max(0, total - masteredCount);
 }
 function removeFromReview(tier, word) {
   const s = loadStore();
@@ -1088,14 +1111,29 @@ function shuffle(arr) {
   return a;
 }
 function pickWords(pool, tier, n) {
-  const mastered = (loadStore().mastered[tier] || []);
-  const fresh = pool.filter(w => !mastered.includes((w.w || '').toLowerCase()));
-  const a = shuffle(fresh);
+  const store = loadStore();
+  const mastered = store.mastered[tier] || [];
+  const missed = (store.missedByAI && store.missedByAI[tier]) || [];
+  const isMastered = w => mastered.includes((w.w || '').toLowerCase());
+  const isMissed = w => missed.includes((w.w || '').toLowerCase());
+
+  // 优先级 1：missedByAI 里的词（AI 干掉/替换掉的，优先补回）
+  const priority1 = pool.filter(w => isMissed(w) && !isMastered(w));
+  // 优先级 2：未掌握的常规词（排除优先级 1）
+  const priority2 = pool.filter(w => !isMastered(w) && !isMissed(w));
+  // 优先级 3：全部兜底
+  const priority3 = pool.slice();
+
   const result = [];
-  while (result.length < n && a.length) result.push(a.pop());
-  if (!result.length) {
-    const b = shuffle(pool);
-    while (result.length < n && b.length) result.push(b.pop());
+  const p1 = shuffle(priority1);
+  while (result.length < n && p1.length) result.push(p1.pop());
+  if (result.length < n) {
+    const p2 = shuffle(priority2);
+    while (result.length < n && p2.length) result.push(p2.pop());
+  }
+  if (result.length < n) {
+    const p3 = shuffle(priority3);
+    while (result.length < n && p3.length) result.push(p3.pop());
   }
   return result;
 }
@@ -1179,6 +1217,22 @@ function buildLevel(levelNum) {
   while (mysteryIdx.size < mysteryCount && mysteryIdx.size < mixed.length) mysteryIdx.add(Math.floor(Math.random() * mixed.length));
   mysteryIdx.forEach(i => { mixed[i].mystery = true; });
   applyPendingVerify(mixed);
+
+  /* 本关已抽到的词，从 missedByAI 中移除（已补回） */
+  const s = loadStore();
+  if (!s.missedByAI) s.missedByAI = { basic: [], core: [], extra: [] };
+  mixed.forEach(item => {
+    const tier = item.tier;
+    const k = (item.word.w || '').toLowerCase();
+    if (!k) return;
+    const arr = s.missedByAI[tier];
+    if (!arr) return;
+    const idx = arr.indexOf(k);
+    if (idx > -1) arr.splice(idx, 1);
+  });
+  STORE = s;
+  saveStore(s);
+
   placeEnemies(mixed);
   return mixed;
 }
@@ -1682,14 +1736,17 @@ function update(dt) {
   for (const p of G.projectiles) {
     p.x += p.vx * dt;
     p.y += p.vy * dt;
-    if (p.isGreen) {
+        if (p.isGreen) {
       if (p.target && p.target.alive) {
         const dx = p.x - p.target.x, dy = p.y - p.target.y;
         if (Math.hypot(dx, dy) < 5) {
           p.dead = true;
           p.target.hp -= p.dmg;
           updateEnemyHpUi(p.target);
-          if (p.target.hp <= 0) skillKillEnemy(p.target);
+          if (p.target.hp <= 0) {
+            addMissedByAI(p.target.tier, p.target.word.w);   // 友军击杀的词，记为未学
+            skillKillEnemy(p.target);
+          }
         }
       } else p.dead = true;
     } else {
@@ -1852,6 +1909,7 @@ function spawnParticles(xPct, yPct, color, count) {
 }
 function swallowEnemy(eater, prey) {
   if (!prey.alive) return;
+  addMissedByAI(prey.tier, prey.word.w);   // 被黑球吞噬的词，记为未学
   const dx = eater.x - prey.x, dy = eater.y - prey.y;
   if (prey.el) {
     prey.el.style.setProperty('--sx', dx + 'vw');
@@ -1897,6 +1955,7 @@ function spitEnemy(eater) {
 }
 function mutateEnemy(e) {
   if (!e.alive) return;
+  addMissedByAI(e.tier, e.word.w);   // 紫球变异替换掉的词，记为未学
   const types = ['blue', 'orange', 'red'];
   const type = types[Math.floor(Math.random() * types.length)];
   const tier = type === 'blue' ? 'basic' : type === 'orange' ? 'core' : 'extra';
@@ -2486,16 +2545,19 @@ function startLevel(levelNum, isReview) {
   const levelNumEl = document.getElementById('levelNum');
   const totalEl = document.getElementById('totalLevels');
   const badgeEl = document.getElementById('levelBadge');
+    const unitEl = document.getElementById('lvUnit');
   if (G.isReview) {
     badgeEl.classList.add('review');
     if (prefixEl) prefixEl.textContent = '复习第';
     if (levelNumEl) levelNumEl.textContent = levelNum;
     if (totalEl) totalEl.textContent = G.reviewTotalLevels;
+    if (unitEl) unitEl.textContent = '关';
   } else {
     badgeEl.classList.remove('review');
     if (prefixEl) prefixEl.textContent = '第';
     if (levelNumEl) levelNumEl.textContent = levelNum;
-    if (totalEl) totalEl.textContent = TOTAL_LEVELS;
+    if (totalEl) totalEl.textContent = getRemainingWords();
+    if (unitEl) unitEl.textContent = '词';
   }
   updateHUD();
   document.getElementById('resultMask').classList.remove('show');
@@ -2539,6 +2601,15 @@ function checkLevelClear() {
     hideRules();
     G.elapsed = performance.now() - G.startTime - G.pauseOffset;
     updateTimerDisplay();
+
+    /* 主关卡通关时立即保存进度，避免点"返回首页"后回到第 1 关 */
+    if (!G.isReview) {
+      const s = loadStore();
+      s.level = Math.max(s.level, G.level + 1);
+      STORE = s;
+      saveStore(s);
+    }
+
     const p = document.getElementById('player');
     if (p) p.style.bottom = (TREASURE_Y - 10) + '%';
     setTimeout(() => showResult(true), 850);
@@ -2719,11 +2790,14 @@ function resetProgress() {
   showAppModal({
     title: '重置进度',
     content: '确定要重置全部闯关进度吗？<br><span style="font-size:12px;color:#fca5a5">此操作不可恢复！</span>',
-    onConfirm: () => {
+            onConfirm: () => {
       STORE = defaultStore();
       saveStore(STORE);
       _lastRankKey = '';
       document.getElementById('levelNum').textContent = '1';
+      document.getElementById('totalLevels').textContent = getRemainingWords();
+      const lvUnitEl = document.getElementById('lvUnit');
+      if (lvUnitEl) lvUnitEl.textContent = '词';
       updateRankHUD(); updateReviewCount(); updateItemBag();
       showToast('✅', '进度已重置', '将从第 1 关开始', '#4ade80');
     }
@@ -2760,7 +2834,9 @@ requestAnimationFrame(loop);
 
 (function init() {
   document.getElementById('levelNum').textContent = STORE.level || 1;
-  document.getElementById('totalLevels').textContent = TOTAL_LEVELS;
+  document.getElementById('totalLevels').textContent = getRemainingWords();
+  const lvUnitEl = document.getElementById('lvUnit');
+  if (lvUnitEl) lvUnitEl.textContent = '词';
   document.getElementById('enemyLeft').textContent = TOTAL_PER_LEVEL;
   const fill = document.getElementById('playerHpFill');
   if (fill) fill.style.width = '100%';
