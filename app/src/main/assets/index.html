@@ -383,7 +383,10 @@ body { font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-ser
 .revive-text { position: fixed; left: 50%; top: 40%; transform: translate(-50%, -50%); font-size: 48px; font-weight: 900; color: #fbbf24; text-shadow: 0 0 20px #f59e0b, 0 0 40px #ef4444, 0 4px 10px rgba(0,0,0,.8); pointer-events: none; z-index: 9999; letter-spacing: 4px; animation: reviveGlow 2.2s ease-out forwards; }
 @keyframes reviveGlow { 0% { opacity: 0; transform: scale(0.5) translateY(20px); } 30% { opacity: 1; transform: scale(1.2) translateY(0); filter: brightness(2); } 70% { opacity: 1; transform: scale(1.1) translateY(-10px); filter: brightness(1); } 100% { opacity: 0; transform: scale(1.5) translateY(-40px); } }
 .bomb-blast { position: absolute; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%; border: 4px solid #ef4444; box-shadow: 0 0 30px #ef4444, inset 0 0 20px #fbbf24; animation: blastAnim 0.8s ease-out forwards; pointer-events: none; z-index: 100; }
-@keyframes blastAnim { 0% { transform: scale(0.5); opacity: 1; } 100% { transform: scale(14); opacity: 0; border-width: 0px; } }
+@keyframes blastAnim { 
+  0%   { transform: scale(0.5); opacity: 1; } 
+  100% { transform: scale(var(--blast-scale, 14)); opacity: 0; border-width: 0px; } 
+}
 .hero-proj { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; z-index: 25; pointer-events: none; background: #fbbf24; clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
 .hero-proj.fast { background: #38bdf8; box-shadow: 0 0 10px #38bdf8; }
 .hero-proj.strong { background: #ef4444; box-shadow: 0 0 15px #ef4444; width: 16px; height: 16px; margin: -8px 0 0 -8px; }
@@ -1240,15 +1243,49 @@ function useBomb() {
   const items = document.querySelectorAll('.skill-item');
   for (let i = 0; i < items.length; i++) { if (items[i].textContent === '💣') { removeSkillItem(items[i]); break; } }
   sfxHit();
+
+  const w = _arenaW || arena.clientWidth || 1;
+  const h = _arenaH || arena.clientHeight || 1;
+
+  // 爆炸中心（逻辑坐标：x 从左往右、y 从下往上，单位 %）
+  const cxPct = 50;
+  const cyPct = 60;
+
+  // 换算成像素（从左上角算）
+  const cxPx = cxPct / 100 * w;
+  const cyPx = (1 - cyPct / 100) * h;
+
+  // 判定半径：屏幕短边的 35%，视觉与逻辑共用同一个值
+  const radius = Math.min(w, h) * 0.35;
+
+  // 视觉爆炸：直接用像素定位，和判定圆心完全重合
   const blast = document.createElement('div');
-  blast.className = 'bomb-blast'; blast.style.left = '50%'; blast.style.top = '60%';
-  document.getElementById('arena').appendChild(blast);
-  setTimeout(() => blast.remove(), 800);
+  blast.className = 'bomb-blast';
+  blast.style.left = cxPx + 'px';
+  blast.style.top  = cyPx + 'px';
+  blast.style.setProperty('--blast-scale', ((radius * 2) / 40).toFixed(2));
+  arena.appendChild(blast);
+  setTimeout(() => blast.remove(), 850);
+
+  // 判定：真实像素距离
+  let hitCount = 0;
   G.enemies.forEach(e => {
     if (!e.alive) return;
-    const dist = Math.hypot(e.x - 50, e.y - 60);
-    if (dist < 40) { e.hp -= 50; updateEnemyHpUi(e); if (e.hp <= 0) skillKillEnemy(e); }
+    const ex = e.x / 100 * w;
+    const ey = (1 - e.y / 100) * h;
+    const dist = Math.hypot(ex - cxPx, ey - cyPx);
+    if (dist < radius) {
+      e.hp -= 50;
+      updateEnemyHpUi(e);
+      popEnemyDamage(e.x, e.y, 50);
+      hitCount++;
+      if (e.hp <= 0) skillKillEnemy(e);
+    }
   });
+
+  if (hitCount === 0) {
+    showToast('💣', '爆炸落空', '范围内没有敌人', '#f59e0b');
+  }
 }
 function useSoundWave() {
   if (CHAR_SKILLS.freezeUntil > performance.now() || !G.running || G.paused) return;
@@ -1760,6 +1797,16 @@ function popHeal(n) {
   arena.appendChild(el);
   setTimeout(() => el.remove(), 950);
 }
+ function popEnemyDamage(xPct, yPct, n, color) {
+  const el = document.createElement('div');
+  el.className = 'dmg-pop';
+  el.textContent = '-' + n;
+  el.style.left = xPct + '%';
+  el.style.bottom = yPct + '%';
+  if (color) el.style.color = color;
+  arena.appendChild(el);
+  setTimeout(() => el.remove(), 950);
+} 
 function spawnShieldShatter(xPct, yPct) {
   spawnParticles(xPct, yPct, '#38bdf8', 8);
   const rect = arena.getBoundingClientRect();
