@@ -206,18 +206,28 @@ body { font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-ser
 .modal::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 74%; height: 1px; background: linear-gradient(90deg, transparent, rgba(56,189,248,.65), rgba(167,139,250,.65), transparent); pointer-events: none; }
 .modal-grip { width: 44px; height: 5px; border-radius: 3px; background: rgba(148,163,184,.3); margin: 6px auto 16px; box-shadow: inset 0 1px 2px rgba(0,0,0,.5); }
 .modal-top { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; position: relative; }
-
+.item-bar {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 8px 6px 4px 6px;
+  margin: -6px 0 -2px 0; 
+}
+.item-bar::-webkit-scrollbar { display: none; }
 .word-avatar { position: relative; width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; flex: 0 0 auto; animation: avatarFloat 2.4s ease-in-out infinite; }
 @keyframes avatarFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 .word-avatar.blue { background: radial-gradient(circle at 34% 30%, #7dd3fc, #0ea5e9 55%, #075985); box-shadow: 0 0 16px rgba(56,189,248,.7), inset 0 -4px 8px rgba(0,0,0,.35); border: 2px solid rgba(186,230,253,.6); }
 .word-avatar.orange { background: radial-gradient(circle at 34% 30%, #fdba74, #f97316 55%, #9a3412); box-shadow: 0 0 18px rgba(249,115,22,.75), inset 0 -4px 8px rgba(0,0,0,.35); border: 2px solid rgba(254,215,170,.6); }
 .word-avatar.red { background: radial-gradient(circle at 34% 30%, #fca5a5, #ef4444 55%, #7f1d1d); box-shadow: 0 0 18px rgba(239,68,68,.8), inset 0 -4px 8px rgba(0,0,0,.35); border: 2px solid rgba(254,202,202,.6); }
-.word-meaning { flex: 1; min-width: 0; font-size: 20px; font-weight: 800; color: #f1f5f9; line-height: 1.35; letter-spacing: .3px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .item-btn { position: relative; width: 44px; height: 44px; border-radius: 12px; border: 1px solid rgba(56,189,248,.4); background: rgba(56,189,248,.12); color: #7dd3fc; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .18s var(--ease-out); font-family: inherit; flex: 0 0 auto; padding: 0; }
 .item-btn:active { transform: scale(.9); }
 .item-btn .item-count { position: absolute; top: -6px; right: -6px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; background: #fbbf24; color: #1f1300; font-size: 10px; font-weight: 900; line-height: 18px; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,.5); font-variant-numeric: tabular-nums; }
 .item-btn.hl-btn { border-color: rgba(251,191,36,.45); background: rgba(251,191,36,.14); color: #fbbf24; }
-.item-btn.fl-btn { border-color: rgba(167,139,250,.45); background: rgba(167,139,250,.14); color: #c4b5fd; }
 .modal-close { width: 38px; height: 38px; border-radius: 50%; border: 1px solid rgba(148,163,184,.25); background: rgba(148,163,184,.08); color: var(--txt-dim); font-size: 20px; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; flex: 0 0 auto; transition: all .22s var(--ease-out); font-family: inherit; }
 .modal-close:hover { background: rgba(239,68,68,.18); color: #fca5a5; border-color: rgba(239,68,68,.42); transform: rotate(90deg); }
 .modal-close:active { transform: rotate(90deg) scale(.9); }
@@ -229,8 +239,26 @@ body { font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-ser
 .q-area::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(148,163,184,.18), transparent); }
 .q-en { font-size: clamp(18px, 5vw, 22px); line-height: 1.9; color: #e8edf5; margin-bottom: 12px; word-break: break-word; letter-spacing: .3px; }
 .q-cn { font-size: clamp(14px, 4vw, 16px); color: var(--txt-dim); margin-bottom: 2px; }
-.blank { display: inline-block; border-bottom: 3px solid var(--green); text-align: center; font-weight: 800; color: #f8fafc; padding: 0 12px; min-width: 100px; vertical-align: middle; min-height: 1.35em; letter-spacing: .8px; transition: color .15s, border-color .15s; }
-.blank .caret { display: inline-block; width: 3px; height: 1em; background: var(--green); vertical-align: -2px; margin-left: 2px; border-radius: 1px; animation: blink 1s step-end infinite; }
+.blank { 
+  display: inline-block; /* 改回纯文本块 */
+  text-align: center; 
+  border-bottom: 3px solid var(--green); 
+  font-weight: 800; 
+  color: #f8fafc; 
+  padding: 0 12px; 
+  min-width: 100px; 
+  vertical-align: middle; 
+  min-height: 1.35em; 
+  letter-spacing: .8px; 
+  transition: color .15s, border-color .15s; 
+}
+/* 半透明占位符 */
+.blank-placeholder {
+  color: rgba(255, 255, 255, 0.25);
+  pointer-events: none;
+  user-select: none;
+}
+.blank .caret { display: inline-block; width: 3px; height: 1em; background: var(--green); vertical-align: -2px; margin-left: 1px; border-radius: 1px; animation: blink 1s step-end infinite; }
 @keyframes blink { 50% { opacity: 0; } }
 
 .feedback { margin-top: 0; padding: 0 18px; border-radius: 12px; font-size: 16px; line-height: 1.6; display: block; opacity: 0; overflow: hidden; box-sizing: border-box; border: 1px solid transparent; transition: margin-top .3s cubic-bezier(.22,1,.36,1), opacity .25s ease; }
@@ -376,9 +404,163 @@ body { font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-ser
 /* =========================================================
    新增：角色技能专属样式
    ========================================================= */
-.skill-slot { position: absolute; left: 50%; bottom: calc(100% + 26px); transform: translateX(-50%); display: flex; flex-direction: row; gap: 6px; z-index: 40; pointer-events: auto; }
-.skill-item { width: 32px; height: 32px; border-radius: 50%; background: rgba(15,23,42,.95); border: 2px solid #fbbf24; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; box-shadow: 0 0 12px rgba(251,191,36,.6); animation: skillFloat 2s ease-in-out infinite; }
-@keyframes skillFloat { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-4px) scale(1.1); } }
+/* 技能槽容器 */
+/* 技能槽容器 */
+.skill-slot { 
+  position: absolute; 
+  left: 50%; 
+  bottom: calc(100% + 26px); 
+  transform: translateX(-50%); 
+  display: flex; 
+  flex-direction: row; 
+  gap: 14px; 
+  z-index: 40; 
+  pointer-events: auto; 
+}
+
+/* 单个技能（容器） */
+.skill-item { 
+  position: relative;
+  width: 38px; 
+  height: 38px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  font-size: 16px; 
+  cursor: pointer; 
+  animation: skillFloat 2.5s ease-in-out infinite; 
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+}
+
+/* 圆角五角星本体 */
+.skill-item::before {
+  content: '';
+  position: absolute;
+  inset: -4px; /* 稍微向外扩展一点，让星星看起来更饱满 */
+  background: linear-gradient(135deg, rgba(56,189,248,0.5), rgba(167,139,250,0.6));
+  
+  /* 使用 SVG 遮罩代替 clip-path，配合高数值的 stroke-width 实现圆钝的角 */
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='50,15 61,40 95,40 68,60 79,90 50,72 21,90 32,60 5,40 39,40' fill='white' stroke='white' stroke-width='16' stroke-linejoin='round'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='50,15 61,40 95,40 68,60 79,90 50,72 21,90 32,60 5,40 39,40' fill='white' stroke='white' stroke-width='16' stroke-linejoin='round'/%3E%3C/svg%3E");
+  
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  
+  z-index: -1;
+  filter: drop-shadow(0 0 6px rgba(56,189,248,0.6));
+  animation: starPulse 2s infinite alternate;
+}
+
+/* 外围柔光光环 */
+.skill-item::after {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(56,189,248,0.35) 0%, transparent 70%);
+  z-index: -2;
+  animation: auraPulse 1.5s infinite alternate;
+}
+
+/* 悬浮动画 */
+@keyframes skillFloat { 
+  0%, 100% { transform: translateY(0) scale(1); } 
+  50% { transform: translateY(-4px) scale(1.05); } 
+}
+
+/* 星光呼吸动画 */
+@keyframes starPulse {
+  0% { filter: drop-shadow(0 0 4px rgba(56,189,248,0.4)); }
+  100% { filter: drop-shadow(0 0 10px rgba(56,189,248,0.9)); }
+}
+
+/* 外围光环缩放 */
+@keyframes auraPulse {
+  0% { transform: scale(0.85); opacity: 0.6; }
+  100% { transform: scale(1.15); opacity: 1; }
+}
+/* 单个技能（五角星） */
+/* ================= 炫酷流光技能槽 ================= */
+/* ================= 科技感全息技能槽 ================= */
+.skill-slot { 
+  position: absolute; 
+  left: 50%; 
+  bottom: calc(100% + 24px); 
+  transform: translateX(-50%); 
+  display: flex; 
+  flex-direction: row; 
+  gap: 16px; 
+  z-index: 40; 
+  pointer-events: auto; 
+}
+
+/* 单个技能容器 */
+.skill-item { 
+  position: relative;
+  width: 32px; 
+  height: 32px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  font-size: 15px; 
+  cursor: pointer; 
+  animation: skillFloat 3s ease-in-out infinite; 
+  text-shadow: 0 0 8px rgba(0, 243, 255, 0.8); 
+}
+
+/* 1. 核心全息星体 */
+.skill-item::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #00f3ff, #9d00ff);
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='50,18 62,36 82,42 68,56 72,78 50,68 28,78 32,56 18,42 38,36' fill='white' stroke='white' stroke-width='28' stroke-linejoin='round'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='50,18 62,36 82,42 68,56 72,78 50,68 28,78 32,56 18,42 38,36' fill='white' stroke='white' stroke-width='28' stroke-linejoin='round'/%3E%3C/svg%3E");
+  -webkit-mask-size: contain; mask-size: contain;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: center; mask-position: center;
+  z-index: -1;
+  filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 6px #00f3ff);
+  animation: starScan 2s linear infinite;
+}
+
+/* 2. 外围科技扫描光环 */
+.skill-item::after {
+  content: '';
+  position: absolute;
+  inset: -8px; 
+  border-radius: 50%;
+  border: 1px dashed rgba(0, 243, 255, 0.6);
+  background: 
+    conic-gradient(from 0deg, transparent 0%, rgba(0, 243, 255, 0.4) 20%, transparent 40%, transparent 100%),
+    radial-gradient(circle, rgba(157, 0, 255, 0.15) 0%, transparent 70%);
+  z-index: -2;
+  animation: techRingSpin 4s linear infinite, techPulse 1.5s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+/* 动画部分完全不用动 */
+@keyframes skillFloat { 
+  0%, 100% { transform: translateY(0) scale(1); } 
+  50% { transform: translateY(-4px) scale(1.02); } 
+}
+@keyframes starScan {
+  0% { filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 6px #00f3ff) brightness(1); }
+  50% { filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 10px #9d00ff) brightness(1.3); }
+  100% { filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 6px #00f3ff) brightness(1); }
+}
+@keyframes techRingSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes techPulse {
+  0% { opacity: 0.6; box-shadow: inset 0 0 8px rgba(0, 243, 255, 0.2); }
+  100% { opacity: 1; box-shadow: inset 0 0 16px rgba(0, 243, 255, 0.5), 0 0 12px rgba(157, 0, 255, 0.3); }
+}
 
 .revive-text { position: fixed; left: 50%; top: 40%; transform: translate(-50%, -50%); font-size: 48px; font-weight: 900; color: #fbbf24; text-shadow: 0 0 20px #f59e0b, 0 0 40px #ef4444, 0 4px 10px rgba(0,0,0,.8); pointer-events: none; z-index: 9999; letter-spacing: 4px; animation: reviveGlow 2.2s ease-out forwards; }
 @keyframes reviveGlow { 0% { opacity: 0; transform: scale(0.5) translateY(20px); } 30% { opacity: 1; transform: scale(1.2) translateY(0); filter: brightness(2); } 70% { opacity: 1; transform: scale(1.1) translateY(-10px); filter: brightness(1); } 100% { opacity: 0; transform: scale(1.5) translateY(-40px); } }
@@ -631,10 +813,10 @@ body { font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-ser
     <div class="modal-grip"></div>
     <div class="modal-top">
       <div class="word-avatar blue" id="wordAvatar"><span id="avatarEmoji">👾</span></div>
-      <div class="word-meaning" id="wordMeaning">保护</div>
-      <button class="item-btn" id="speakerBtn" onclick="useSpeaker()" aria-label="播放读音">🎺<span class="item-count" id="speakerCount">0</span></button>
-      <button class="item-btn hl-btn" id="highlightBtn" onclick="useHighlight()" aria-label="高亮字母">⌨️<span class="item-count" id="highlightCount">0</span></button>
-      <button class="item-btn fl-btn" id="firstLetterBtn" onclick="useFirstLetter()" aria-label="首字母提示">💡<span class="item-count" id="firstLetterCount">0</span></button>
+      <div class="item-bar" id="itemBar">
+        <button class="item-btn" id="speakerBtn" onclick="useSpeaker()" aria-label="播放读音">🎺<span class="item-count" id="speakerCount">0</span></button>
+        <button class="item-btn hl-btn" id="highlightBtn" onclick="useHighlight()" aria-label="高亮字母">⌨️<span class="item-count" id="highlightCount">0</span></button>
+      </div>
       <button class="modal-close" onclick="closeChallenge()" aria-label="关闭">✕</button>
     </div>
     <div class="phon-bubble" id="phonBubble"></div>
@@ -855,7 +1037,8 @@ function defaultStore() {
     items: { speaker: 0, highlight: 0, firstLetter: 0 },
     speakerMilestone: 0,
     bestHp: 100,
-    totalKills: 0
+    totalKills: 0,
+    errorLog: {}
   };
 }
 function loadStore() {
@@ -873,7 +1056,8 @@ function loadStore() {
         items: items,
         speakerMilestone: j.speakerMilestone || 0,
         bestHp: j.bestHp || 100,
-        totalKills: j.totalKills || 0
+        totalKills: j.totalKills || 0,
+        errorLog: j.errorLog || {}
       };
     }
   } catch (e) {}
@@ -897,6 +1081,45 @@ function addToReview(tier, word) {
   if (w && !s.review[tier].includes(w)) s.review[tier].push(w);
   STORE = s; saveStore(s); updateReviewCount();
 }
+function recordError(tier, word, inputText) {
+  const s = loadStore();
+  if (!s.errorLog) s.errorLog = {};
+  const w = (word || '').toLowerCase();
+  if (!w) return;
+  const input = (inputText || '').trim().toLowerCase();
+  const now = Date.now();
+
+  if (!s.errorLog[w]) {
+    s.errorLog[w] = { count: 0, lastAt: 0, tier: tier, inputs: [] };
+  }
+  const entry = s.errorLog[w];
+  if (!entry.inputs) entry.inputs = [];
+
+  entry.count = (entry.count || 0) + 1;
+  entry.lastAt = now;
+  entry.tier = tier;
+
+  if (input) {
+    const existing = entry.inputs.find(x => x.text === input);
+    if (existing) {
+      existing.count = (existing.count || 0) + 1;
+      existing.lastAt = now;
+    } else {
+      entry.inputs.push({ text: input, count: 1, lastAt: now });
+    }
+    // 最多保留最近 10 条，防止无限增长
+    if (entry.inputs.length > 10) {
+      entry.inputs.sort((a, b) => b.lastAt - a.lastAt);
+      entry.inputs = entry.inputs.slice(0, 10);
+    }
+  }
+
+  STORE = s;
+  saveStore(s);
+}
+
+
+
 function addMissedByAI(tier, word) {
   const s = loadStore();
   const w = (word || '').toLowerCase();
@@ -983,30 +1206,25 @@ function updateItemBag() {
   if (!bag) return;
   const sp = (s.items && s.items.speaker) || 0;
   const hl = (s.items && s.items.highlight) || 0;
-  const fl = (s.items && s.items.firstLetter) || 0;
   let html = '';
   if (sp > 0) html += '<span class="item-chip">🎺<b>' + sp + '</b></span>';
   if (hl > 0) html += '<span class="item-chip">⌨️<b>' + hl + '</b></span>';
-  if (fl > 0) html += '<span class="item-chip">💡<b>' + fl + '</b></span>';
   bag.innerHTML = html;
 }
 function updateItemButtons() {
   const s = loadStore();
   const sp = (s.items && s.items.speaker) || 0;
   const hl = (s.items && s.items.highlight) || 0;
-  const fl = (s.items && s.items.firstLetter) || 0;
+  
   const speakerBtn = document.getElementById('speakerBtn');
   const highlightBtn = document.getElementById('highlightBtn');
-  const firstLetterBtn = document.getElementById('firstLetterBtn');
   const speakerCount = document.getElementById('speakerCount');
   const highlightCount = document.getElementById('highlightCount');
-  const firstLetterCount = document.getElementById('firstLetterCount');
+
   if (speakerBtn) { speakerBtn.style.opacity = sp > 0 ? '1' : '0.25'; speakerBtn.style.filter = sp > 0 ? 'none' : 'grayscale(1)'; }
   if (highlightBtn) { highlightBtn.style.opacity = hl > 0 ? '1' : '0.25'; highlightBtn.style.filter = hl > 0 ? 'none' : 'grayscale(1)'; }
-  if (firstLetterBtn) { firstLetterBtn.style.opacity = fl > 0 ? '1' : '0.25'; firstLetterBtn.style.filter = fl > 0 ? 'none' : 'grayscale(1)'; }
   if (speakerCount) speakerCount.textContent = sp;
   if (highlightCount) highlightCount.textContent = hl;
-  if (firstLetterCount) firstLetterCount.textContent = fl;
 }
 
 /* =========================================================
@@ -1124,8 +1342,22 @@ function isCorrect(typed, w, seg) {
    ========================================================= */
 let _actx = null;
 function ac() {
-  if (!_actx) { try { _actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
-  if (_actx && _actx.state === 'suspended') _actx.resume();
+  // 1. 检查用户是否已经和页面有过交互（点击、触摸等）
+  const isActive = navigator.userActivation ? navigator.userActivation.hasBeenActive : true;
+  
+  // 如果用户还没点过任何地方，直接静默返回 null，连 AudioContext 都不去创建
+  if (!isActive) return null;
+
+  // 2. 用户已经交互过了，正常初始化
+  if (!_actx) { 
+    try { _actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} 
+  }
+  
+  // 3. 如果状态是 suspended，尝试恢复，并捕获可能出现的异步报错
+  if (_actx && _actx.state === 'suspended') {
+    _actx.resume().catch(() => {});
+  }
+  
   return _actx;
 }
 function beep(freq, dur, type, vol, delay) {
@@ -1221,8 +1453,7 @@ const MYSTERY_EFFECTS = [
   { id: 'bg',     emoji: '🌈', name: '幻境切换', desc: '战场背景被重新渲染', color: '#f472b6' },
   { id: 'revive', emoji: '♻️', name: '亡魂复苏', desc: '已击败的单词重新出现', color: '#f59e0b' },
   { id: 'speaker', emoji: '🎺', name: '获得喇叭', desc: '填词时可播放读音 +1', color: '#38bdf8' },
-  { id: 'highlight', emoji: '⌨️', name: '获得键盘高亮', desc: '填词时可高亮字母 +1', color: '#fbbf24' },
-  { id: 'firstLetter', emoji: '💡', name: '获得首字母提示', desc: '填词时自动填入首字母 +1', color: '#c4b5fd' }
+  { id: 'highlight', emoji: '⌨️', name: '获得键盘高亮', desc: '填词时可高亮字母 +1', color: '#fbbf24' }
 ];
 
 const TOTAL_LEVELS = (() => {
@@ -2256,7 +2487,6 @@ function triggerMystery(enemy) {
     case 'revive': reviveEnemies(enemy); break;
     case 'speaker': addItem('speaker', 1); break;
     case 'highlight': addItem('highlight', 1); break;
-    case 'firstLetter': addItem('firstLetter', 1); break;
   }
   showToast(eff.emoji, eff.name, eff.desc, eff.color);
   sfxMystery();
@@ -2330,10 +2560,18 @@ function burstStars(cx, cy) {
 }
 function grantChestTreasure() {
   const r = Math.random();
-  if (r < 0.3) { G.shieldUntil = Math.max(G.shieldUntil, performance.now()) + 30000; showToast('🛡️', '护盾激活！', '30 秒内免疫所有攻击', '#38bdf8'); }
-  else if (r < 0.55) { addItem('speaker', 1); showToast('🎺', '获得喇叭 ×1', '填词时可播放读音', '#38bdf8'); }
-  else if (r < 0.8) { addItem('highlight', 1); showToast('⌨️', '获得键盘高亮 ×1', '填词时可高亮字母', '#fbbf24'); }
-  else { addItem('firstLetter', 1); showToast('💡', '获得首字母提示 ×1', '填词时自动填入首字母', '#c4b5fd'); }
+  if (r < 0.33) { 
+    G.shieldUntil = Math.max(G.shieldUntil, performance.now()) + 30000; 
+    showToast('🛡️', '护盾激活！', '30 秒内免疫所有攻击', '#38bdf8'); 
+  }
+  else if (r < 0.66) { 
+    addItem('speaker', 1); 
+    showToast('🎺', '获得喇叭 ×1', '填词时可播放读音', '#38bdf8'); 
+  }
+  else { 
+    addItem('highlight', 1); 
+    showToast('⌨️', '获得键盘高亮 ×1', '填词时可高亮字母', '#fbbf24'); 
+  }
   sfxMystery();
 }
 
@@ -2393,8 +2631,6 @@ const fbEl = document.getElementById('fb');
 const keyboardEl = document.getElementById('keyboard');
 const wordAvatar = document.getElementById('wordAvatar');
 const avatarEmoji = document.getElementById('avatarEmoji');
-const wordMeaning = document.getElementById('wordMeaning');
-
 let C = { enemy: null, typed: '', seg: '', segFirst: false, answered: false };
 
 function setFeedback(cls, html) {
@@ -2428,7 +2664,7 @@ function openChallenge(enemy) {
   C.enemy = enemy; C.typed = ''; C.seg = ''; C.segFirst = false; C.answered = false;
   wordAvatar.className = 'word-avatar ' + enemy.type;
   avatarEmoji.textContent = EMOJI[enemy.type];
-  wordMeaning.textContent = enemy.word.m || '';
+  //wordMeaning.textContent = enemy.word.m || '';
   setFeedback('', '');
   clearTimeout(_fbTimer);
   updateItemButtons();
@@ -2497,7 +2733,19 @@ function pressChar(ch) {
 function updateBlank() {
   const b = document.getElementById('blankSpace');
   if (!b) return;
-  if (!C.typed) { b.innerHTML = '<span class="caret"></span>'; return; }
+  
+  // 获取首字母，如果是短语（如 be good at），也会取到 b
+  const firstChar = (C.enemy.word.w || '').charAt(0).toLowerCase();
+  const placeholderHtml = firstChar ? '<span class="blank-placeholder">' + firstChar + '</span>' : '';
+
+  // 如果用户什么都没输入，光标在前，半透明首字母在后
+  if (!C.typed) { 
+    b.innerHTML = '<span class="caret"></span>' + placeholderHtml; 
+    b.style.color = '#e8edf5';
+    return; 
+  }
+  
+  // 用户输入后，半透明字母消失，光标跟在用户输入的内容后面
   const ok = isCorrect(C.typed, C.enemy.word.w, C.seg);
   b.innerHTML = escapeHtml(C.typed) + '<span class="caret"></span>';
   b.style.color = ok ? '#10b981' : '#e8edf5';
@@ -2518,18 +2766,6 @@ function useHighlight() {
   const letters = new Set((C.enemy.word.w || '').toLowerCase().replace(/[^a-z]/g, '').split(''));
   keyboardEl.querySelectorAll('[data-key]').forEach(btn => { if (letters.has(btn.dataset.key)) btn.classList.add('hint'); });
   beep(1300, .05, 'sine', .06); beep(1700, .08, 'sine', .05, .05);
-}
-function useFirstLetter() {
-  if (!C.enemy) return;
-  const s = loadStore();
-  if (!s.items || (s.items.firstLetter || 0) <= 0) { showToast('💡', '缺少道具', '打怪掉落宝箱有概率获得', '#f59e0b'); return; }
-  if (!useItem('firstLetter')) return;
-  const word = C.enemy.word.w;
-  if (!word) return;
-  C.typed = word[0] || '';
-  if (C.segFirst) C.typed = C.typed.toUpperCase();
-  updateBlank(); sfxKey();
-  beep(1200, .1, 'sine', .08);
 }
 let _speakAudio = null;
 function speakCurrent() {
@@ -2558,8 +2794,9 @@ function handleWrongAnswer(e) {
     }
     const newWord = pickReplacementWordReview(correctWord);
     if (newWord) e.word = newWord;
-  } else {
+    } else {
     addToReview(e.tier, correctWord);
+    recordError(e.tier, correctWord, C.typed);
     const newWord = pickReplacementWord(e.tier, correctWord);
     if (newWord) e.word = newWord;
   }
@@ -2567,7 +2804,7 @@ function handleWrongAnswer(e) {
     const tag = e.el.querySelector('.enemy-tag');
     if (tag) tag.textContent = e.word.m || e.word.cn || '';
   }
-  wordMeaning.textContent = e.word.m || '';
+  //wordMeaning.textContent = e.word.m || '';
   C.typed = ''; C.seg = ''; C.segFirst = false;
   clearKeyboardHint();
   showPhonBubble('');
