@@ -1544,8 +1544,10 @@ function renderCardFace() {
   el.meaningBubble.classList.remove('show');
   el.meaningBtn.textContent = 'CHINESE';
   el.meaningBtn.classList.remove('pulse');
+  el.meaningBtn.disabled = false;
   el.soundBtn.textContent = 'PRONUNCIATION';
   el.soundBtn.classList.remove('pulse');
+  el.soundBtn.disabled = false;
   el.card.classList.remove('flipped');
   cardFlipped = false;
   cardTappedThisTime = { meaning: false, sound: false, flipped: false };
@@ -1597,7 +1599,7 @@ function fillCard(w) {
   }
 
   renderStudyDots(key);
-
+  el.meaningBtn.disabled = false;
   el.soundBtn.disabled = !w.p;
 }
 
