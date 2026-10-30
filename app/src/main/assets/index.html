@@ -387,9 +387,148 @@ body { font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-ser
   0%   { transform: scale(0.5); opacity: 1; } 
   100% { transform: scale(var(--blast-scale, 14)); opacity: 0; border-width: 0px; } 
 }
-.hero-proj { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; z-index: 25; pointer-events: none; background: #fbbf24; clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
-.hero-proj.fast { background: #38bdf8; box-shadow: 0 0 10px #38bdf8; }
-.hero-proj.strong { background: #ef4444; box-shadow: 0 0 15px #ef4444; width: 16px; height: 16px; margin: -8px 0 0 -8px; }
+
+/* =========================================================
+   我方星形子弹：加大 + 多层光芒 + 脉冲光晕
+   结构：父元素只负责定位；::before 是星形本体；::after 是外圈光晕
+   ========================================================= */
+.hero-proj {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  margin: -11px 0 0 -11px;
+  z-index: 25;
+  pointer-events: none;
+}
+
+/* 星形本体（clip-path 裁剪 + 跟随星形轮廓的多层光）
+   注意：不能用 box-shadow，会被 clip-path 一起裁掉，必须用 filter: drop-shadow */
+.hero-proj::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #fbbf24;
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  filter:
+    drop-shadow(0 0 5px #fbbf24)
+    drop-shadow(0 0 12px #fbbf24)
+    drop-shadow(0 0 22px rgba(251,191,36,.7));
+  z-index: 2;
+  animation: heroProjPulse .7s ease-in-out infinite;
+}
+
+/* 外圈光晕（在父元素外面扩展，父元素没裁剪，所以能正常显示） */
+.hero-proj::after {
+  content: '';
+  position: absolute;
+  inset: -14px;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(251,191,36,.65) 0%,
+    rgba(251,191,36,.22) 42%,
+    transparent 72%);
+  z-index: 1;
+  pointer-events: none;
+  animation: heroProjHalo .9s ease-in-out infinite;
+}
+
+/* 光芒脉冲：整体亮度一呼一吸 */
+@keyframes heroProjPulse {
+  0%, 100% {
+    filter:
+      drop-shadow(0 0 5px #fbbf24)
+      drop-shadow(0 0 12px #fbbf24)
+      drop-shadow(0 0 22px rgba(251,191,36,.7));
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 10px #fbbf24)
+      drop-shadow(0 0 22px #fbbf24)
+      drop-shadow(0 0 38px rgba(251,191,36,1));
+  }
+}
+
+/* 外圈光晕：缩放 + 明暗脉动 */
+@keyframes heroProjHalo {
+  0%, 100% { transform: scale(.82); opacity: .55; }
+  50%      { transform: scale(1.18); opacity: 1; }
+}
+
+/* =========================================================
+   003 急速星芒 —— 蓝色，略小，偏冷
+   ========================================================= */
+.hero-proj.fast {
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+}
+.hero-proj.fast::before {
+  background: #38bdf8;
+  filter:
+    drop-shadow(0 0 5px #38bdf8)
+    drop-shadow(0 0 12px #38bdf8)
+    drop-shadow(0 0 22px rgba(56,189,248,.7));
+  animation-name: heroProjPulseFast;
+}
+.hero-proj.fast::after {
+  background: radial-gradient(circle,
+    rgba(56,189,248,.65) 0%,
+    rgba(56,189,248,.22) 42%,
+    transparent 72%);
+}
+@keyframes heroProjPulseFast {
+  0%, 100% {
+    filter:
+      drop-shadow(0 0 5px #38bdf8)
+      drop-shadow(0 0 12px #38bdf8)
+      drop-shadow(0 0 22px rgba(56,189,248,.7));
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 10px #38bdf8)
+      drop-shadow(0 0 22px #38bdf8)
+      drop-shadow(0 0 38px rgba(56,189,248,1));
+  }
+}
+
+/* =========================================================
+   004 重击星芒 —— 红色，更大，更烈
+   ========================================================= */
+.hero-proj.strong {
+  width: 28px;
+  height: 28px;
+  margin: -14px 0 0 -14px;
+}
+.hero-proj.strong::before {
+  background: #ef4444;
+  filter:
+    drop-shadow(0 0 7px #ef4444)
+    drop-shadow(0 0 16px #ef4444)
+    drop-shadow(0 0 30px rgba(239,68,68,.8));
+  animation-name: heroProjPulseStrong;
+}
+.hero-proj.strong::after {
+  inset: -18px;
+  background: radial-gradient(circle,
+    rgba(239,68,68,.7) 0%,
+    rgba(239,68,68,.25) 44%,
+    transparent 76%);
+}
+@keyframes heroProjPulseStrong {
+  0%, 100% {
+    filter:
+      drop-shadow(0 0 7px #ef4444)
+      drop-shadow(0 0 16px #ef4444)
+      drop-shadow(0 0 30px rgba(239,68,68,.8));
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 14px #ef4444)
+      drop-shadow(0 0 30px #ef4444)
+      drop-shadow(0 0 50px rgba(239,68,68,1));
+  }
+}
+
 .charm-fading { animation: charmFade 5s forwards; pointer-events: none; }
 @keyframes charmFade { 0% { opacity: 1; transform: scale(1); } 20% { opacity: 0.5; transform: scale(0.9) rotate(10deg); filter: grayscale(0.5); } 90% { opacity: 0.1; transform: scale(0.8); filter: grayscale(1); } 100% { opacity: 0; transform: scale(0); } }
 .hurricane-flying { animation: hurricaneFly 1.5s ease-in forwards; pointer-events: none; }
@@ -580,8 +719,8 @@ body { font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-ser
    ========================================================= */
 const CHAR_DATA = [
   { id: '001', name: '兵王冷毅', desc: '【浴火重生】死亡后自动满血复活，最多两次。' },
-  { id: '002', name: '冒险之剑', desc: '【定点爆破】战斗中获取炸弹，可对敌人造成50点范围伤害。' },
-  { id: '003', name: '安智理', desc: '【急速星芒】自动发射高频星形子弹，威力较弱但连绵不绝。' },
+  { id: '002', name: '冒险之剑', desc: '【定点爆破】战斗中获取炸弹，可对敌人造成大范围伤害。' },
+  { id: '003', name: '安智理', desc: '【急速星芒】自动发射高频子弹，威力较弱但连绵不绝。' },
   { id: '004', name: '桀骜速风', desc: '【重击星芒】自动发射低频星形子弹，速度慢但威力极强。' },
   { id: '005', name: '婉离疏', desc: '【时间音波】释放音波，让全体敌人静止30秒，任你输出。' },
   { id: '006', name: '蒙奇路飞', desc: '【吞噬符咒】使用符咒，让随机一名敌人渐隐消失。' },
@@ -1177,23 +1316,37 @@ function applyPendingVerify(mixed) {
 }
 
 function placeEnemies(list) {
-  const cols = [12, 31, 50, 69, 88];
-  const rows = [78, 66, 54, 42];
+  const placed = [];
   list.forEach((e, i) => {
-    const r = Math.floor(i / 5);
-    const c = i % 5;
     const cfg = ENEMY_CFG[e.type];
+
+    // 随机战斗位置：下方 42%~82% 范围内，简单去重避免叠在一起
+    let x, y, tries = 0;
+    do {
+      x = 8 + Math.random() * 84;   // 8 ~ 92
+      y = 42 + Math.random() * 40;  // 42 ~ 82
+      tries++;
+    } while (
+      tries < 8 &&
+      placed.some(p => Math.abs(p.x - x) < 8 && Math.abs(p.y - y) < 8)
+    );
+    placed.push({ x, y });
+
     e.id = i;
-    e.x = cols[c]; e.y = rows[r % rows.length];
-    e.homeX = e.x; e.homeY = e.y;
+    e.x = x; e.y = y;
+    e.homeX = x; e.homeY = y;
     e.alive = true; e.el = null; e.aimLine = null;
     e.speed = cfg.speed * (0.85 + Math.random() * 0.35);
-    e.tx = e.x; e.ty = e.y; e.wanderTimer = 0;
-    /* 平缓开火：首发时间均匀铺平在整个攻击周期内，杜绝开局一波流 */
+    e.tx = x; e.ty = y; e.wanderTimer = 0;
     e.fireTimer = Math.random() * cfg.fireMax;
     e.nextAimed = Math.random() < cfg.aimProb;
     e.aimingPlayer = false;
     e.hp = 100; e.maxHp = 100; e.killedBySkill = false; e.cleaned = false;
+
+    // 弹出式入场：只需要延迟，不需要屏幕外起点
+    e.entering = true;
+   // e.entryDelay = i * 70 + Math.random() * 120;
+    e.entryDelay = Math.random() * 1500;
     if (e.type === 'black') e.actionTimer = 3 + Math.random() * 4;
     if (e.type === 'purple') e.mutateTimer = 6 + Math.random() * 5;
   });
@@ -1204,7 +1357,7 @@ function buildLevel(levelNum) {
   const redWords    = pickWords(GRADE_MAP.extra.data, 'extra', COMPOSITION.red);
   const list = [];
   const addWord = (w, t, tier) => {
-    let type = t; const tag = Number(w.tag2);
+    let type = t; const tag = Number(w.tag3);
     if (tag === 1) type = 'green'; else if (tag === 2) type = 'black'; else if (tag === 3) type = 'purple';
     list.push({ word: w, type: type, tier: tier, mystery: false });
   };
@@ -1434,8 +1587,11 @@ function escapeHtml(s) {
 function createEnemyEl(e) {
   const div = document.createElement('div');
   div.className = 'enemy ' + e.type + (e.mystery ? ' mystery' : '');
+
+  // 直接放在最终位置
   div.style.left = e.x + '%';
   div.style.bottom = e.y + '%';
+
   const meaning = e.word.m || e.word.cn || '';
   div.innerHTML =
     '<div class="enemy-inner">' +
@@ -1445,12 +1601,15 @@ function createEnemyEl(e) {
       '</div>' +
     '</div>';
   div.style.setProperty('--d1', `-${Math.random() * 2}s`);
+
   div.addEventListener('click', ev => {
     ev.stopPropagation();
     if (G.preparing) return;
+    if (e.entering) return;                    // ← 入场期间禁止点击
     if (G.paused || !G.running || !e.alive) return;
     openChallenge(e);
   });
+
   entityLayer.appendChild(div);
   e.el = div;
   updateEnemyHpUi(e);
@@ -1460,6 +1619,27 @@ function createEnemyEl(e) {
   line.style.display = 'none';
   arena.appendChild(line);
   e.aimLine = line;
+
+  // 弹出式入场：scale(0) → scale(1) + 淡入
+  if (e.entering) {
+    div.style.opacity = '0';
+    div.style.transform = 'scale(0)';
+    setTimeout(() => {
+      if (!e.el || !e.alive) return;
+      div.style.transition =
+        'transform 0.55s cubic-bezier(.34,1.56,.64,1), ' +
+        'opacity 0.3s ease';
+      div.style.transform = 'scale(1)';
+      div.style.opacity = '1';
+      setTimeout(() => {
+        if (!e.el) return;
+        e.entering = false;
+        div.style.transition = '';
+        div.style.transform = '';
+        div.style.opacity = '';
+      }, 600);
+    }, e.entryDelay || 0);
+  }
 }
 function updateEnemyHpUi(e) {
   if (!e.el) return;
@@ -1496,6 +1676,7 @@ function syncEntities() {
       if (e.aimLine && e.aimLine.style.display !== 'none') e.aimLine.style.display = 'none';
       continue;
     }
+    if (e.entering) continue;
     if (e.el.style.display === 'none') e.el.style.display = '';
     const lx = e.x + '%', ly = e.y + '%';
     if (e.el.style.left !== lx) e.el.style.left = lx;
@@ -1680,6 +1861,7 @@ function update(dt) {
 
   /* 敌人 AI */
   for (const e of aliveEnemies) {
+    if (e.entering) { e.aimingPlayer = false; continue; }
     if (isFrozen) { e.aimingPlayer = false; continue; }
     wanderEnemy(e, dt);
     const cfg = ENEMY_CFG[e.type];
